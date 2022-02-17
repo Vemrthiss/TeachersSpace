@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "617827186330",
+    "project_id": "teachers-space-4e2da",
+    "storage_bucket": "teachers-space-4e2da.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:617827186330:android:5483ea27743b3a4a171123",
+        "android_client_info": {
+          "package_name": "com.teachersspace"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "617827186330-leh9fk8ggivs8fdhnh789vubfbrva4eq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.teachersspace",
+            "certificate_hash": "36f998e663188bfde1b370869c64d4bb7ae3681b"
+          }
+        },
+        {
+          "client_id": "617827186330-8cra5g7uje4a4bjqp7co1cgmkadpbbk1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDjNefGC1f7456XSk1hV7XxXjnTx1GMm2Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "617827186330-8cra5g7uje4a4bjqp7co1cgmkadpbbk1.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

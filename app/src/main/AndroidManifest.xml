@@ -10,6 +10,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.TeachersSpace">
         <activity
+            android:name=".communications.CommunicationsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".auth.FirebaseAuthActivity"
+            android:exported="false" />
+        <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
