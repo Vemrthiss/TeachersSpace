@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract;
@@ -21,14 +22,18 @@ import java.util.Arrays;
 import java.util.List;
 
 // hopefully gradle builds next time without this direct import...
+import com.google.firebase.auth.FirebaseUserMetadata;
 import com.teachersspace.R;
 
 public class FirebaseAuthActivity extends AppCompatActivity {
+    private String TAG = "FirebaseAuthActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_firebase_auth);
+
+        this.createSignInIntent();
     }
 
     private final ActivityResultLauncher<Intent> signInLauncher = registerForActivityResult(
@@ -59,7 +64,20 @@ public class FirebaseAuthActivity extends AppCompatActivity {
         IdpResponse response = result.getIdpResponse();
         if (result.getResultCode() == RESULT_OK) {
             // Successfully signed in
-            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+            Log.d(this.TAG, "hi");
+
+            // here I am attempting to check if the user is a new user on sign in
+            // might not be logging because of async operations, not sure how to deal with them
+            // ideally, I want to listen to the user creation event, and categorise the NEW users
+            // separately since custom metadata is not supported for firebase auth users
+            // another way is to use Firebase functions, but it would not know how to categorise users
+            // due to different runtime environment
+
+//            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+//            FirebaseUserMetadata userMetadata = user.getMetadata();
+//            if (userMetadata.getCreationTimestamp() == userMetadata.getLastSignInTimestamp()) {
+//                Log.d(this.TAG, "a new user!");
+//            }
             // ...
         } else {
             // Sign in failed. If response is null the user canceled the
@@ -75,6 +93,7 @@ public class FirebaseAuthActivity extends AppCompatActivity {
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     public void onComplete(@NonNull Task<Void> task) {
                         // ...
+                        Log.d("FirebaseSignOutFunction", "signed out!");
                     }
                 });
     }

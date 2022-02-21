@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">Teachers Space</string>
+    <string name="login_text">Login</string>
+    <string name="signout_text">Logout</string>
+    <string name="navigate_main_teacher">Teachers</string>
+    <string name="navigate_main_student">Students</string>
+    <string name="navigate_main_parent">Parents</string>
+    <string name="dashboard_title">Dashboard</string>
 </resources>

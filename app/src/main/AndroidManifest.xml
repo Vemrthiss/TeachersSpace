@@ -10,6 +10,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.TeachersSpace">
         <activity
+            android:name=".teacher.TeacherActivity"
+            android:exported="false" />
+        <activity
             android:name=".communications.CommunicationsActivity"
             android:exported="false" />
         <activity

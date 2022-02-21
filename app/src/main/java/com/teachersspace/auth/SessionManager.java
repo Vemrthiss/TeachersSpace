@@ -34,7 +34,7 @@ public class SessionManager {
     }
 
 //    public static String getUserIdToken() {
-//        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+//        FirebaseUser user = getFirebaseLoginInfo();
 //        if (user != null) {
 //            user.getIdToken(false)
 //                    .addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
