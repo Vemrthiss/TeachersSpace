@@ -8,14 +8,19 @@ exports.handler = function(context, event, callback) {
 
     const { to } = event;
     if (!to) {
-        callback("Valid to number/client was not provided", null);
+        client.calls.create({
+            url,
+            to: '+6597664983',
+            from: callerNumber
+        });
+        callback("Valid to number/client was not provided, calling the default numbner", null);
     } else if (isE164Number(to)) {
         console.log("Calling number:" + to);
         client.calls.create({
             url,
             to,
             from: callerNumber,
-        }, function(err, result) {    
+        }, function(err, result) {
             // End our function
             if (err) {
                 callback(err, null);

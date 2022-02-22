@@ -26,7 +26,7 @@ import com.google.firebase.auth.FirebaseUserMetadata;
 import com.teachersspace.R;
 
 public class FirebaseAuthActivity extends AppCompatActivity {
-    private String TAG = "FirebaseAuthActivity";
+    private static String TAG = "FirebaseAuthActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,7 +64,7 @@ public class FirebaseAuthActivity extends AppCompatActivity {
         IdpResponse response = result.getIdpResponse();
         if (result.getResultCode() == RESULT_OK) {
             // Successfully signed in
-            Log.d(this.TAG, "hi");
+            Log.d(TAG, "hi");
 
             // here I am attempting to check if the user is a new user on sign in
             // might not be logging because of async operations, not sure how to deal with them
@@ -76,7 +76,7 @@ public class FirebaseAuthActivity extends AppCompatActivity {
 //            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 //            FirebaseUserMetadata userMetadata = user.getMetadata();
 //            if (userMetadata.getCreationTimestamp() == userMetadata.getLastSignInTimestamp()) {
-//                Log.d(this.TAG, "a new user!");
+//                Log.d(TAG, "a new user!");
 //            }
             // ...
         } else {

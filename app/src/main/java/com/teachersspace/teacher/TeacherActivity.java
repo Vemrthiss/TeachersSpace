@@ -27,5 +27,7 @@ public class TeacherActivity extends AppCompatActivity {
             Intent activateLoginIntent = new Intent(this, FirebaseAuthActivity.class);
             startActivity(activateLoginIntent);
         }
+
+        // TODO: request permission for microphone
     }
 }
