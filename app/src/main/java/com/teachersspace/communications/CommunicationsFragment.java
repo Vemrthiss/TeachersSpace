@@ -74,7 +74,7 @@ public class CommunicationsFragment extends Fragment {
     private static final String TAG = "CommunicationsFragment";
     private static final int MIC_PERMISSION_REQUEST_CODE = 1;
     private static final int PERMISSIONS_REQUEST_CODE = 100;
-    private String accessToken = "PASTE_YOUR_ACCESS_TOKEN_HERE";
+    private String accessToken;
     private TwilioTokenManager tokenManager;
 
     // Audio Device Management
@@ -120,13 +120,6 @@ public class CommunicationsFragment extends Fragment {
             return null;
         }
         return tokenManager.getTwilioAccessToken();
-    }
-
-    private void updateTwilioToken() {
-        String storedTwilioToken = this.getStoredTwilioToken();
-        if (storedTwilioToken == null || storedTwilioToken.length() < 1) {
-
-        }
     }
 
     /**
@@ -246,9 +239,10 @@ public class CommunicationsFragment extends Fragment {
                                 @NonNull String fcmToken) {
                 String message = String.format(
                         Locale.US,
-                        "Registration Error: %d, %s",
+                        "Registration Error: %d, %s, AccessToken: %s",
                         error.getErrorCode(),
-                        error.getMessage());
+                        error.getMessage(),
+                        accessToken);
                 Log.e(TAG, message);
                 Snackbar.make(coordinatorLayout, message, Snackbar.LENGTH_LONG).show();
             }
@@ -509,6 +503,7 @@ public class CommunicationsFragment extends Fragment {
             EditText contact = ((AlertDialog) dialog).findViewById(R.id.contact);
             HashMap<String, String> params = new HashMap<>();
             params.put("to", contact.getText().toString());
+            accessToken = getStoredTwilioToken();
             ConnectOptions connectOptions = new ConnectOptions.Builder(accessToken)
                     .params(params)
                     .build();
@@ -554,7 +549,8 @@ public class CommunicationsFragment extends Fragment {
         FirebaseMessaging.getInstance().getToken().addOnSuccessListener(getActivity(), tokenResult -> {
             if (tokenResult != null) {
                 String fcmToken = tokenResult;
-                Log.i(TAG, "Registering with FCM");
+                String accessToken = getStoredTwilioToken();
+                Log.i(TAG, accessToken + " Registering with FCM" + tokenResult);
                 Voice.register(accessToken, Voice.RegistrationChannel.FCM, fcmToken, registrationListener);
             }
         });

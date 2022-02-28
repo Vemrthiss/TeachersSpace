@@ -1,18 +1,26 @@
 package com.teachersspace.communications;
 
 import android.content.Context;
+import android.util.Log;
 
+import com.android.volley.Request;
 import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.teachersspace.helpers.SharedPreferencesManager;
 
 public class TwilioTokenManager extends SharedPreferencesManager {
+    private static String TAG = "TwilioTokenManager";
     private static final String PREF_NAME = "TwilioToken";
-    private static final String TWILIO_SERVER_URL= "http://twilio-server-6765-dev.twil.io/";
+    private static final String TWILIO_SERVER_URL= "https://twilio-server-6765-dev.twil.io";
+    private static final String TWILIO_IDENTITY = "defaultIdentity";
     private RequestQueue queue = Volley.newRequestQueue(this.context);
 
     public TwilioTokenManager(Context ctx) {
         super(ctx);
+        generateNewAccessToken();
     }
 
     @Override
@@ -29,7 +37,21 @@ public class TwilioTokenManager extends SharedPreferencesManager {
         return this.sessionObject.getString("twilioAccessToken", "");
     }
 
-    public String generateNewAccessToken() {
+    public void generateNewAccessToken() {
+        String queryUrl = TWILIO_SERVER_URL + "/token?identity=" + TWILIO_IDENTITY;
+        StringRequest tokenRequest = new StringRequest(Request.Method.GET, queryUrl, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                String newToken = response.substring(1, response.length() - 1);
+                setTwilioAccessToken(newToken);
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.w(TAG, "Token error is: " + error.getMessage());
+            }
+        });
 
+        queue.add(tokenRequest);
     }
 }

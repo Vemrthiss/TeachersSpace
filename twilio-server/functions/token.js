@@ -34,7 +34,8 @@ exports.handler = function(context, event, callback) {
         "Content-Type": "application/json"
     };
     response.setHeaders(headers);
-    response.setBody(token.toJwt());
+    let jwtToken = token.toJwt();
+    response.setBody(jwtToken);
 
     return callback(null, response);
 }
