@@ -9,4 +9,11 @@
         android:title="@string/audio_device"
         app:showAsAction="ifRoom" />
 
+    <item android:title="Contacts"
+        android:id="@+id/contactsFragment"
+        android:icon="@drawable/ic_baseline_list_alt_24"/>
+    <item android:title="Settings"
+        android:id="@+id/settingsFragment"
+        android:icon="@drawable/ic_baseline_settings_24" />
+
 </menu>
