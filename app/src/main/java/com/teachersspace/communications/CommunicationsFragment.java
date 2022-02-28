@@ -75,6 +75,7 @@ public class CommunicationsFragment extends Fragment {
     private static final int MIC_PERMISSION_REQUEST_CODE = 1;
     private static final int PERMISSIONS_REQUEST_CODE = 100;
     private String accessToken = "PASTE_YOUR_ACCESS_TOKEN_HERE";
+    private TwilioTokenManager tokenManager;
 
     // Audio Device Management
     private AudioSwitch audioSwitch;
@@ -83,8 +84,6 @@ public class CommunicationsFragment extends Fragment {
 
     private boolean isReceiverRegistered = false;
     private VoiceBroadcastReceiver voiceBroadcastReceiver;
-
-    HashMap<String, String> params = new HashMap<>();
 
     private CoordinatorLayout coordinatorLayout;
     private FloatingActionButton callActionFab;
@@ -113,6 +112,21 @@ public class CommunicationsFragment extends Fragment {
 
     public CommunicationsFragment() {
         // Required empty public constructor
+    }
+
+    // twilio access token
+    private String getStoredTwilioToken() {
+        if (tokenManager == null) {
+            return null;
+        }
+        return tokenManager.getTwilioAccessToken();
+    }
+
+    private void updateTwilioToken() {
+        String storedTwilioToken = this.getStoredTwilioToken();
+        if (storedTwilioToken == null || storedTwilioToken.length() < 1) {
+
+        }
     }
 
     /**
@@ -153,6 +167,7 @@ public class CommunicationsFragment extends Fragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         // TODO: review the below line, has to do with onCreateOptionsMenu override below, currently has some error on overriding perhaps due to toolbar/action bar not set up yet?
         setHasOptionsMenu(true);
+        tokenManager = new TwilioTokenManager(getContext());
 
         // migrated from quickstart activity onCreate hook
         // These flags ensure that the activity can be launched when the screen is locked.
@@ -492,6 +507,7 @@ public class CommunicationsFragment extends Fragment {
         return (dialog, which) -> {
             // TODO: Place a call
             EditText contact = ((AlertDialog) dialog).findViewById(R.id.contact);
+            HashMap<String, String> params = new HashMap<>();
             params.put("to", contact.getText().toString());
             ConnectOptions connectOptions = new ConnectOptions.Builder(accessToken)
                     .params(params)

@@ -10,22 +10,18 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.GetTokenResult;
+import com.teachersspace.helpers.SharedPreferencesManager;
 
-public class SessionManager {
-    public SharedPreferences sessionObject;
-
-    public SharedPreferences.Editor sessionObjectEditor;
-
-    private Context context;
-
-    int PRIVATE_MODE = 0;
-
+public class SessionManager extends SharedPreferencesManager {
     private static final String PREF_NAME = "LoginSession";
 
     public SessionManager(Context ctx) {
-        this.context = ctx;
-        this.sessionObject = context.getSharedPreferences(PREF_NAME, PRIVATE_MODE);
-        this.sessionObjectEditor = sessionObject.edit();
+        super(ctx);
+    }
+
+    @Override
+    public String getPrefName() {
+        return SessionManager.PREF_NAME;
     }
 
     public static FirebaseUser getFirebaseLoginInfo() {

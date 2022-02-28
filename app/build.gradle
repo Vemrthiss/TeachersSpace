@@ -60,4 +60,7 @@ dependencies {
     // ------ TWILIO CLIENT ---------
     implementation "com.twilio:audioswitch:1.1.4"
     implementation "com.twilio:voice-android:6.0.7"
+
+    // --- HTTP networking library
+    implementation 'com.android.volley:volley:1.2.1'
 }

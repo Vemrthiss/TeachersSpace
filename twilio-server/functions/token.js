@@ -14,16 +14,15 @@ exports.handler = function(context, event, callback) {
         twilioApiSecret,
         {
             identity,
-            ttl: 86400, // 24 hours
+            ttl: 86400, // 24 hours, max lifespan
         }
     );
-
-    // token only got max lifespan of 24 hours
     
     const VoiceGrant = AccessToken.VoiceGrant;
     const voiceGrant = new VoiceGrant({
         outgoingApplicationSid: context.APP_SID,
-        incomingAllow: true // allows your client-side device to receive calls as well as make them
+        incomingAllow: true, // allows your client-side device to receive calls as well as make them
+        pushCredentialSid: context.PUSH_CREDENTIAL_SID
     });
     token.addGrant(voiceGrant);
 
