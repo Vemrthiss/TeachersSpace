@@ -1,6 +1,6 @@
 exports.handler = function(context, event, callback) {
     const twilioAccountSid = context.ACCOUNT_SID;
-    const twilioApiKey = context.API_KEY;
+    const twilioApiKey = context.API_KEY_SID;
     const twilioApiSecret = context.API_SECRET;
     // any URL parameters passed on an API call to a Twilio Function are available on the event object
     // Think of the identity as a sort of username,
@@ -34,9 +34,7 @@ exports.handler = function(context, event, callback) {
         "Content-Type": "application/json"
     };
     response.setHeaders(headers);
-    response.setBody({
-        accessToken: token.toJwt()
-    });
+    response.setBody(token.toJwt());
 
     return callback(null, response);
 }
