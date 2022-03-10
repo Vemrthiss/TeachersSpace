@@ -650,6 +650,10 @@ public class CommunicationsFragment extends Fragment {
             Snackbar.make(coordinatorLayout,
                     "Microphone permissions needed. Please allow in your application settings.",
                     Snackbar.LENGTH_LONG).show();
+            ActivityCompat.requestPermissions(
+                    getActivity(),
+                    new String[]{Manifest.permission.RECORD_AUDIO},
+                    MIC_PERMISSION_REQUEST_CODE);
         } else {
             ActivityCompat.requestPermissions(
                     getActivity(),

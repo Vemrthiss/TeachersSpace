@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 
 // hopefully can remove
 import com.google.firebase.auth.FirebaseUser;
@@ -12,7 +13,7 @@ import com.teachersspace.auth.FirebaseAuthActivity;
 import com.teachersspace.auth.SessionManager;
 
 public class TeacherActivity extends AppCompatActivity {
-    private String TAG = "TeacherActivity";
+    private final String TAG = "TeacherActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,8 +27,8 @@ public class TeacherActivity extends AppCompatActivity {
         if (currentUser == null) {
             Intent activateLoginIntent = new Intent(this, FirebaseAuthActivity.class);
             startActivity(activateLoginIntent);
+        } else {
+            Log.d(TAG, "currentUser: " + currentUser.getEmail());
         }
-
-        // TODO: request permission for microphone
     }
 }

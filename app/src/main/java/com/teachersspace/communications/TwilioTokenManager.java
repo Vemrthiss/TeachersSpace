@@ -12,7 +12,7 @@ import com.android.volley.toolbox.Volley;
 import com.teachersspace.helpers.SharedPreferencesManager;
 
 public class TwilioTokenManager extends SharedPreferencesManager {
-    private static String TAG = "TwilioTokenManager";
+    private static final String TAG = "TwilioTokenManager";
     private static final String PREF_NAME = "TwilioToken";
     private static final String TWILIO_SERVER_URL= "https://twilio-server-6765-dev.twil.io";
     private static final String TWILIO_IDENTITY = "defaultIdentity";

@@ -13,6 +13,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.TeachersSpace">
+        <activity
+            android:name=".student.StudentActivity"
+            android:exported="false" />
+
         <service
             android:name=".fcm.VoiceFirebaseMessagingService"
             android:enabled="true"

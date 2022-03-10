@@ -68,4 +68,7 @@ dependencies {
 
     // --- HTTP networking library
     implementation 'com.android.volley:volley:1.2.1'
+
+    // For serialising and deserialising objects to put in SharedPreferences
+    implementation 'com.google.code.gson:gson'
 }

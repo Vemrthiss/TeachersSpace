@@ -24,15 +24,17 @@ import java.util.List;
 // hopefully gradle builds next time without this direct import...
 import com.google.firebase.auth.FirebaseUserMetadata;
 import com.teachersspace.R;
+import com.teachersspace.models.User;
 
 public class FirebaseAuthActivity extends AppCompatActivity {
-    private static String TAG = "FirebaseAuthActivity";
+    private static final String TAG = "FirebaseAuthActivity";
+    private SessionManager sessionManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_firebase_auth);
-
+        this.sessionManager = new SessionManager(this);
         this.createSignInIntent();
     }
 
@@ -64,7 +66,6 @@ public class FirebaseAuthActivity extends AppCompatActivity {
         IdpResponse response = result.getIdpResponse();
         if (result.getResultCode() == RESULT_OK) {
             // Successfully signed in
-            Log.d(TAG, "hi");
 
             // here I am attempting to check if the user is a new user on sign in
             // might not be logging because of async operations, not sure how to deal with them
@@ -78,6 +79,9 @@ public class FirebaseAuthActivity extends AppCompatActivity {
 //            if (userMetadata.getCreationTimestamp() == userMetadata.getLastSignInTimestamp()) {
 //                Log.d(TAG, "a new user!");
 //            }
+
+            this.sessionManager.onLogin(this);
+
             // ...
         } else {
             // Sign in failed. If response is null the user canceled the
@@ -88,6 +92,7 @@ public class FirebaseAuthActivity extends AppCompatActivity {
     }
 
     public void signOut() {
+        this.sessionManager.clearCurrentUser();
         AuthUI.getInstance()
                 .signOut(this)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {

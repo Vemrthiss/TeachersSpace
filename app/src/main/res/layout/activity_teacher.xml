@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".teacher.TeacherActivity">
+    tools:context=".teacher.TeacherActivity"
+    android:id="@+id/teacher_activity">
 
     <TextView
         android:id="@+id/teacher_main_heading"
