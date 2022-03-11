@@ -154,7 +154,7 @@ public abstract class CallEnabledActivity extends AppCompatActivity implements C
 
     @Override
     protected void onStart() {
-        getCommunicationsFragment();
+        setupFragment();
         super.onStart();
     }
 
@@ -163,6 +163,9 @@ public abstract class CallEnabledActivity extends AppCompatActivity implements C
         super.onResume();
         registerReceiver();
         startAudioSwitch();
+        setupFragment();
+        // Displays a call dialog if the intent contains a call invite
+        handleIncomingCallIntent(getIntent());
     }
 
     @Override
@@ -205,8 +208,8 @@ public abstract class CallEnabledActivity extends AppCompatActivity implements C
         voiceBroadcastReceiver = new VoiceBroadcastReceiver();
         registerReceiver();
 
-        // Displays a call dialog if the intent contains a call invite
-        handleIncomingCallIntent(getIntent());
+//        // Displays a call dialog if the intent contains a call invite
+//        handleIncomingCallIntent(getIntent());
 
         // Ensure required permissions are enabled
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.R) {
@@ -241,6 +244,10 @@ public abstract class CallEnabledActivity extends AppCompatActivity implements C
         if (coordinatorLayout == null) {
             coordinatorLayout = findViewById(R.id.coordinator_layout);
         }
+    }
+    private void setupFragment() {
+        getCommunicationsFragment();
+        getCoordinatorLayout();
     }
 
     /*
@@ -281,11 +288,13 @@ public abstract class CallEnabledActivity extends AppCompatActivity implements C
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-        handleIncomingCallIntent(intent);
+        setIntent(intent);
+        // handleIncomingCallIntent(intent);
     }
 
     public void handleIncomingCallIntent(Intent intent) {
         if (intent != null && intent.getAction() != null) {
+            Log.i(TAG, "handleIncomingCallIntent called with action: " + intent.getAction());
             String action = intent.getAction();
             activeCallInvite = intent.getParcelableExtra(Constants.INCOMING_CALL_INVITE);
             activeCallNotificationId = intent.getIntExtra(Constants.INCOMING_CALL_NOTIFICATION_ID, 0);
@@ -453,6 +462,7 @@ public abstract class CallEnabledActivity extends AppCompatActivity implements C
         notificationManager.cancel(activeCallNotificationId);
         stopService(new Intent(getApplicationContext(), IncomingCallNotificationService.class));
         getCommunicationsFragment();
+        Log.i(TAG, "i reached here" + String.valueOf(communicationsFragment == null));
         communicationsFragment.setCallUI();
         if (alertDialog != null && alertDialog.isShowing()) {
             alertDialog.dismiss();
@@ -564,8 +574,7 @@ public abstract class CallEnabledActivity extends AppCompatActivity implements C
                         error.getErrorCode(),
                         error.getMessage());
                 Log.e(TAG, message);
-                getCoordinatorLayout();
-                getCommunicationsFragment();
+                setupFragment();
                 Snackbar.make(coordinatorLayout, message, Snackbar.LENGTH_LONG).show();
                 communicationsFragment.resetUI();
             }
