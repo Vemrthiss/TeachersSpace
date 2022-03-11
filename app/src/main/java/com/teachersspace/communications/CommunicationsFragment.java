@@ -142,7 +142,7 @@ public class CommunicationsFragment extends Fragment {
      */
     public void resetUI() {
         callActionFab.show();
-        muteActionFab.setImageDrawable(ContextCompat.getDrawable(Objects.requireNonNull(getContext()), R.drawable.ic_mic_white_24dp));
+        muteActionFab.setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.ic_mic_white_24dp));
         holdActionFab.hide();
         holdActionFab.setBackgroundTintList(ColorStateList
                 .valueOf(ContextCompat.getColor(getContext(), R.color.colorAccent)));
@@ -155,9 +155,9 @@ public class CommunicationsFragment extends Fragment {
     public void applyFabState(String buttonWhich, boolean enabled) {
         // Set fab as pressed when call is on hold
         ColorStateList colorStateList = enabled ?
-                ColorStateList.valueOf(ContextCompat.getColor(Objects.requireNonNull(getContext()),
+                ColorStateList.valueOf(ContextCompat.getColor(getContext(),
                         R.color.colorPrimaryDark)) :
-                ColorStateList.valueOf(ContextCompat.getColor(Objects.requireNonNull(getContext()),
+                ColorStateList.valueOf(ContextCompat.getColor(getContext(),
                         R.color.colorAccent));
 
         FloatingActionButton button;
@@ -169,12 +169,6 @@ public class CommunicationsFragment extends Fragment {
             button = holdActionFab; // default
         }
         button.setBackgroundTintList(colorStateList);
-    }
-
-    @NonNull
-    @Override
-    public String toString() {
-        return "CommunicationsFragment toString";
     }
 
     //    private static final int MIC_PERMISSION_REQUEST_CODE = 1;

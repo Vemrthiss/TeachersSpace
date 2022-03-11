@@ -6,7 +6,7 @@ exports.handler = function(context, event, callback) {
 
     const client = context.getTwilioClient();
 
-    const { to } = event;
+    const { to, from } = event;
     const twiml = new Twilio.twiml.VoiceResponse();
     // TWIML VERSION
     if (!to) {
@@ -15,14 +15,14 @@ exports.handler = function(context, event, callback) {
         const dial = twiml.dial({callerId : callerNumber});
         dial.number(to);
     } else {
-        const dial = twiml.dial({callerId : callerId});
+        const dial = twiml.dial({callerId : 'client:' + from});
         dial.client(to);
     }
     callback(null, twiml);
 
     // CALL RESOURCE VERSION
     // if (!to) {
-    //     await client.calls.create({
+    //     client.calls.create({
     //         url,
     //         to: '+6597664983',
     //         from: callerNumber
@@ -47,8 +47,8 @@ exports.handler = function(context, event, callback) {
     //     client.calls.create({
     //         url,
     //         to: 'client:' + to,
-    //         from: callerId,
-    //     }, function(err, result) {    
+    //         from: 'client:' + from,
+    //     }, function(err, result) {
     //         // End our function
     //         if (err) {
     //             callback(err, null);
