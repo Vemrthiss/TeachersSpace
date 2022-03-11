@@ -13,9 +13,16 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.TeachersSpace">
-        <activity
-            android:name=".student.StudentActivity"
-            android:exported="false" />
+
+        <service
+            android:enabled="true"
+            android:name=".communications.IncomingCallNotificationService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="ACTION_ACCEPT" />
+                <action android:name="ACTION_REJECT" />
+            </intent-filter>
+        </service>
 
         <service
             android:name=".fcm.VoiceFirebaseMessagingService"
@@ -26,6 +33,9 @@
             </intent-filter>
         </service>
 
+        <activity
+            android:name=".student.StudentActivity"
+            android:exported="false" />
         <activity
             android:name=".parent.ParentActivity"
             android:exported="false" />

@@ -15,11 +15,12 @@ public class TwilioTokenManager extends SharedPreferencesManager {
     private static final String TAG = "TwilioTokenManager";
     private static final String PREF_NAME = "TwilioToken";
     private static final String TWILIO_SERVER_URL= "https://twilio-server-6765-dev.twil.io";
-    private static final String TWILIO_IDENTITY = "defaultIdentity";
+    private static String twilioIdentity = "defaultIdentity";
     private RequestQueue queue = Volley.newRequestQueue(this.context);
 
-    public TwilioTokenManager(Context ctx) {
+    public TwilioTokenManager(Context ctx, String uid) {
         super(ctx);
+        twilioIdentity = uid;
         generateNewAccessToken();
     }
 
@@ -38,7 +39,7 @@ public class TwilioTokenManager extends SharedPreferencesManager {
     }
 
     public void generateNewAccessToken() {
-        String queryUrl = TWILIO_SERVER_URL + "/token?identity=" + TWILIO_IDENTITY;
+        String queryUrl = TWILIO_SERVER_URL + "/token?identity=" + twilioIdentity;
         StringRequest tokenRequest = new StringRequest(Request.Method.GET, queryUrl, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {

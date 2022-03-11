@@ -24,11 +24,15 @@ import com.twilio.voice.CallInvite;
 
 import com.teachersspace.R;
 
+/**
+ * This service handles the notifications from outside the app, not the in-app dialog
+ */
 public class IncomingCallNotificationService extends Service {
     private static final String TAG = IncomingCallNotificationService.class.getSimpleName();
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.d(TAG, "incoming call notification service started");
         String action = intent.getAction();
 
         if (action != null) {
@@ -60,6 +64,7 @@ public class IncomingCallNotificationService extends Service {
     }
 
     private Notification createNotification(CallInvite callInvite, int notificationId, int channelImportance) {
+        Log.d(TAG, "createNotification is called");
         /*
           TODO: how to call a fragment for this notification?
           Sure there is fragment manager, but does it make sense?
