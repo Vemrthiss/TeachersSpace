@@ -2,7 +2,12 @@ package com.teachersspace.models;
 
 import androidx.annotation.NonNull;
 
+import com.google.firebase.firestore.DocumentReference;
+
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 // POJO for converting documents into usable User objects
@@ -25,6 +30,14 @@ public class User {
         this.name = name;
     }
 
+    private String email;
+    public String getEmail() {
+        return this.email;
+    }
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
     public enum UserType {
         TEACHER, PARENT, STUDENT
     }
@@ -36,9 +49,22 @@ public class User {
         this.userType = uType;
     }
 
-    public User(String uid, String name, UserType userType) {
+    private Map<String, Date> contacts = new HashMap<>();
+    public Map<String, Date> getContacts() {
+        return contacts;
+    }
+    public void setContacts(Map<String, Date> contacts) {
+        this.contacts = contacts;
+    }
+
+    public User(String uid, String name, String email, UserType userType, Map<String, Date> contacts) {
+        this(uid, name, email, userType);
+        setContacts(contacts);
+    }
+    public User(String uid, String name, String email, UserType userType) {
         setUid(uid);
         setName(name);
+        setEmail(email);
         setUserType(userType);
     }
     public User() {}
@@ -49,6 +75,8 @@ public class User {
         return "User{" +
                 "uid='" + uid + '\'' +
                 "name='" + name + '\'' +
+                "email='" + email + '\'' +
+                "contacts='" + contacts.toString() + '\'' +
                 ", userType=" + userType +
                 '}';
     }
@@ -57,7 +85,9 @@ public class User {
         Map<String, Object> document = new HashMap<>();
         document.put("uid", getUid());
         document.put("name", getName());
+        document.put("email", getEmail());
         document.put("userType", getUserType());
+        document.put("contacts", getContacts());
         return document;
     }
 }

@@ -19,6 +19,10 @@ import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.ProcessLifecycleOwner;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
+import com.teachersspace.auth.SessionManager;
+import com.teachersspace.models.User;
+import com.teachersspace.parent.ParentActivity;
+import com.teachersspace.student.StudentActivity;
 import com.teachersspace.teacher.TeacherActivity;
 import com.twilio.voice.CallInvite;
 
@@ -29,10 +33,26 @@ import com.teachersspace.R;
  */
 public class IncomingCallNotificationService extends Service {
     private static final String TAG = IncomingCallNotificationService.class.getSimpleName();
+    private SessionManager sessionManager;
+
+    private Class<?> getUserActivityClass() {
+        User user = this.sessionManager.getCurrentUser();
+        if (user == null) {
+            return null;
+        }
+        User.UserType userType = user.getUserType();
+        if (userType == User.UserType.PARENT) {
+            return ParentActivity.class;
+        } else if (userType == User.UserType.STUDENT) {
+            return StudentActivity.class;
+        }
+        return TeacherActivity.class; // default
+    }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(TAG, "incoming call notification service started");
+        this.sessionManager = new SessionManager(this);
         String action = intent.getAction();
 
         if (action != null) {
@@ -66,15 +86,12 @@ public class IncomingCallNotificationService extends Service {
     private Notification createNotification(CallInvite callInvite, int notificationId, int channelImportance) {
         Log.d(TAG, "createNotification is called");
         /*
-          TODO: how to call a fragment for this notification?
-          Sure there is fragment manager, but does it make sense?
-          Because I have the main call fragment in both teacher and parents activities,
-          or should i call the different activities based on user type, and each activity then calls on the fragment itself
+          call the different activities based on user type, and each activity then calls on the fragment itself
           This might make more sense because the examples here CALL activities, and fragments do not exist
-          FOR NOW JUST CALL TEACHER ACTIVITY
+          by default calls teacher activity, refer to getUserActivityClass above
           https://stackoverflow.com/questions/36100187/how-to-start-fragment-from-an-activity
         */
-        Intent intent = new Intent(this, TeacherActivity.class);
+        Intent intent = new Intent(this, getUserActivityClass());
         intent.setAction(Constants.ACTION_INCOMING_CALL_NOTIFICATION);
         intent.putExtra(Constants.INCOMING_CALL_NOTIFICATION_ID, notificationId);
         intent.putExtra(Constants.INCOMING_CALL_INVITE, callInvite);
@@ -130,8 +147,7 @@ public class IncomingCallNotificationService extends Service {
         rejectIntent.putExtra(Constants.INCOMING_CALL_NOTIFICATION_ID, notificationId);
         PendingIntent piRejectIntent = PendingIntent.getService(getApplicationContext(), notificationId, rejectIntent, PendingIntent.FLAG_IMMUTABLE);
 
-        // TODO: same thing here, see above TODO for starting activity, for now just start teacheractivity
-        Intent acceptIntent = new Intent(getApplicationContext(), TeacherActivity.class);
+        Intent acceptIntent = new Intent(getApplicationContext(), getUserActivityClass());
         acceptIntent.setAction(Constants.ACTION_ACCEPT);
         acceptIntent.putExtra(Constants.INCOMING_CALL_INVITE, callInvite);
         acceptIntent.putExtra(Constants.INCOMING_CALL_NOTIFICATION_ID, notificationId);
@@ -174,8 +190,7 @@ public class IncomingCallNotificationService extends Service {
 
     private void accept(CallInvite callInvite, int notificationId) {
         endForeground();
-        // TODO: same thing here, see above TODO for starting activity
-        Intent activeCallIntent = new Intent(this, TeacherActivity.class);
+        Intent activeCallIntent = new Intent(this, getUserActivityClass());
         activeCallIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         activeCallIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         activeCallIntent.putExtra(Constants.INCOMING_CALL_INVITE, callInvite);

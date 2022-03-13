@@ -17,13 +17,25 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+<!--    <androidx.fragment.app.FragmentContainerView-->
+<!--        android:id="@+id/teacher_communications_fragment_container"-->
+<!--        android:name="com.teachersspace.communications.CommunicationsFragment"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        app:layout_constraintBottom_toBottomOf="parent"-->
+<!--        app:layout_constraintEnd_toEndOf="parent"-->
+<!--        app:layout_constraintStart_toStartOf="parent"-->
+<!--        app:layout_constraintTop_toTopOf="parent" />-->
+
     <androidx.fragment.app.FragmentContainerView
-        android:id="@+id/teacher_communications_fragment_container"
-        android:name="com.teachersspace.communications.CommunicationsFragment"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:id="@+id/nav_host_fragment_teacher"
+        android:name="androidx.navigation.fragment.NavHostFragment"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:defaultNavHost="false"
+        app:navGraph="@navigation/nav_graph_teacher" />
 </androidx.constraintlayout.widget.ConstraintLayout>

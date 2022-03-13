@@ -1,5 +1,6 @@
 package com.teachersspace;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.navigation.NavController;
@@ -13,18 +14,24 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.teachersspace.auth.FirebaseAuthActivity;
 import com.teachersspace.auth.SessionManager;
+import com.teachersspace.data.UserRepository;
 import com.teachersspace.models.User;
 import com.teachersspace.parent.ParentActivity;
 import com.teachersspace.student.StudentActivity;
 import com.teachersspace.teacher.TeacherActivity;
 
+import java.util.List;
+
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
-    private Button teacherActivityButton;
     private SessionManager sessionManager;
+    private final UserRepository userRepository = new UserRepository();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,9 +40,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         this.sessionManager = new SessionManager(this);
-
-        this.teacherActivityButton = findViewById(R.id.navigate_main_teacher);
-        this.teacherActivityButton.setOnClickListener(navigateToTeacherActivity());
 
         //for navbar
         //Initialize the bottom navigation view
@@ -67,14 +71,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         navigateToActivity();
-    }
-
-    private View.OnClickListener navigateToTeacherActivity() {
-        // this in lambda expressions are based on enclosing scope
-        return v -> {
-            Intent i = new Intent(this, TeacherActivity.class);
-            startActivity(i);
-        };
     }
 
     private void navigateToActivity() {

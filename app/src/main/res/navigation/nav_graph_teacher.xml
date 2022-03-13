@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph_teacher"
+    app:startDestination="@id/contactsFragmentMain">
+
+    <fragment
+        android:id="@+id/contactsFragmentMain"
+        android:name="com.teachersspace.contacts.ContactsFragment"
+        android:label="ContactsFragment" >
+        <action
+            android:id="@+id/teacher_navigate_single_contact_action"
+            app:destination="@id/communications_fragment_teacher" />
+    </fragment>
+    <fragment
+        android:id="@+id/communications_fragment_teacher"
+        android:name="com.teachersspace.communications.CommunicationsFragment"
+        android:label="fragment_communications"
+        tools:layout="@layout/fragment_communications" />
+</navigation>

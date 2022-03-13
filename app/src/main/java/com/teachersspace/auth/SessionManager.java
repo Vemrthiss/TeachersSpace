@@ -22,6 +22,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.gson.Gson;
+import com.teachersspace.data.UserRepository;
 import com.teachersspace.helpers.SharedPreferencesManager;
 import com.teachersspace.models.User;
 import com.teachersspace.parent.ParentActivity;
@@ -35,13 +36,9 @@ public class SessionManager extends SharedPreferencesManager {
     private static final String TAG = "SessionManager";
     private static final String PREF_NAME = "LoginSession";
     private static final String USER_PREF_KEY = "currentUser";
-    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
     private AlertDialog confirmUserTypeDialog;
     private String chosenUserType;
-
-    public CollectionReference getCollection() {
-        return db.collection("users");
-    }
+    private final UserRepository userRepository = new UserRepository();
 
     public SessionManager(Context ctx) {
         super(ctx);
@@ -81,23 +78,16 @@ public class SessionManager extends SharedPreferencesManager {
         return null;
     }
 
-    public User createUser(String uid, String name, User.UserType userType) {
-        User user = new User(uid, name, userType);
+    public User createUser(String uid, String name, String email, User.UserType userType) {
+        User user = new User(uid, name, email, userType);
 
-        getCollection()
-                .add(user.convertToMap())
-                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                    @Override
-                    public void onSuccess(DocumentReference documentReference) {
-                        Log.d(TAG, "DocumentSnapshot added with ID: " + documentReference.getId());
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.w(TAG, "Error adding document", e);
-                    }
-                });
+        OnSuccessListener<Void> onSuccessListener = unused -> {
+            Log.d(TAG, "successfully created user document");
+        };
+
+        OnFailureListener onFailureListener = e -> Log.w(TAG, "Error adding document", e);
+
+        userRepository.createUser(user, onSuccessListener, onFailureListener);
 
         return user;
     }
@@ -109,43 +99,42 @@ public class SessionManager extends SharedPreferencesManager {
         FirebaseUser user = getFirebaseLoginInfo();
         String uid = getUserUid();
         String name = user.getDisplayName();
-        User.UserType userType = User.UserType.TEACHER; // just for testing
+        String email = user.getEmail();
 
-        getCollection()
-                .whereEqualTo("uid", uid)
-                .limit(1)
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            QuerySnapshot result = task.getResult();
-                            if (result != null) {
-                                if (result.isEmpty()) {
-                                    // detects a NEW USER, onboards user by asking them for user type in a dialog
-                                    // create user data because the associated user cannot be found in db
-                                    confirmUserTypeDialog = chooseUserTypeDialog(activity, confirmUserType(uid, name, activity));
-                                    confirmUserTypeDialog.show();
+        OnCompleteListener<QuerySnapshot> onCompleteListener = new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                if (task.isSuccessful()) {
+                    QuerySnapshot result = task.getResult();
+                    if (result != null) {
+                        if (result.isEmpty()) {
+                            Log.i(TAG, "creating new user in collection");
+                            // detects a NEW USER, onboards user by asking them for user type in a dialog
+                            // create user data because the associated user cannot be found in db
+                            confirmUserTypeDialog = chooseUserTypeDialog(activity, confirmUserType(uid, name, email, activity));
+                            confirmUserTypeDialog.show();
 
-                                } else {
-                                    // get the user from firestore user collection
-                                    List<User> users = result.toObjects(User.class);
-                                    User user = users.get(0);
-                                    // set user info
-                                    setCurrentUser(user);
-                                }
-                            }
                         } else {
-                            Log.d(TAG, "Error getting documents: ", task.getException());
+                            // get the user from firestore user collection
+                            List<User> users = result.toObjects(User.class);
+                            User user = users.get(0);
+                            // set user info
+                            setCurrentUser(user);
                         }
                     }
-                });
+                } else {
+                    Log.d(TAG, "Error getting documents: ", task.getException());
+                }
+            }
+        };
+
+        userRepository.getUserByUid(uid, onCompleteListener);
     }
 
     private void setChosenUserType(String chosenUserType) {
         this.chosenUserType = chosenUserType;
     }
-    private DialogInterface.OnClickListener confirmUserType(String uid, String name, Activity activity) {
+    private DialogInterface.OnClickListener confirmUserType(String uid, String name, String email, Activity activity) {
         return (dialog, which) -> {
             User.UserType userType;
             switch (this.chosenUserType) {
@@ -159,7 +148,7 @@ public class SessionManager extends SharedPreferencesManager {
                 default:
                     userType = User.UserType.TEACHER;
             }
-            User user = createUser(uid, name, userType);
+            User user = createUser(uid, name, email, userType);
             setCurrentUser(user);
             confirmUserTypeDialog.dismiss();
 
