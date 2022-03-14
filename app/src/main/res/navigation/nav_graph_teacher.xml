@@ -8,7 +8,7 @@
     <fragment
         android:id="@+id/contactsFragmentMain"
         android:name="com.teachersspace.contacts.ContactsFragment"
-        android:label="ContactsFragment" >
+        android:label="ContactsFragment">
         <action
             android:id="@+id/teacher_navigate_single_contact_action"
             app:destination="@id/communications_fragment_teacher" />
@@ -17,5 +17,9 @@
         android:id="@+id/communications_fragment_teacher"
         android:name="com.teachersspace.communications.CommunicationsFragment"
         android:label="fragment_communications"
-        tools:layout="@layout/fragment_communications" />
+        tools:layout="@layout/fragment_communications">
+        <argument
+            android:name="contact"
+            app:argType="string"/>
+    </fragment>
 </navigation>

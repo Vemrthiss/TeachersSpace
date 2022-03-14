@@ -11,6 +11,8 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavDirections;
+import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -29,14 +31,47 @@ public class ContactsFragment extends Fragment {
     private ContactsAdapter contactsAdapter;
     private List<User> contacts = new ArrayList<>();
 
+    public ContactsIndividualListener contactsIndividualListenerFactory(int position) {
+        return new ContactsIndividualListener(position);
+    }
+    private class ContactsIndividualListener implements View.OnClickListener {
+        private final int itemPosition;
+
+        public ContactsIndividualListener(int position) {
+            itemPosition = position;
+        }
+
+        @Override
+        public void onClick(View view) {
+            User selectedUser = contacts.get(itemPosition);
+            Log.i(TAG, "testing: " + itemPosition + " " + selectedUser.getUid());
+            NavDirections directions = new NavDirections() {
+                @Override
+                public int getActionId() {
+                    return R.id.teacher_navigate_single_contact_action;
+                }
+
+                @NonNull
+                @Override
+                public Bundle getArguments() {
+                    Bundle args = new Bundle();
+                    args.putString("contact", selectedUser.serialise());
+                    return args;
+                }
+            };
+            NavHostFragment.findNavController(ContactsFragment.this).navigate(directions);
+        }
+    }
+
     private class ContactsObserver implements Observer<List<User>> {
         @Override
         public void onChanged(List<User> updatedContacts) {
             // update UI by updating adapter here when user contacts changes
             // (e.g. new sorting order due to change in activity etc.)
             Log.d(TAG, "contacts list updated");
+            contacts = updatedContacts;
             Log.d(TAG, contacts.toString());
-            contactsAdapter.updateLocalData(updatedContacts);
+            contactsAdapter.updateLocalData(contacts);
         }
     }
 
@@ -60,7 +95,7 @@ public class ContactsFragment extends Fragment {
         // setup recyclerview
         RecyclerView contactsRecyclerView = view.findViewById(R.id.contactsList);
         contactsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        contactsAdapter = new ContactsAdapter(contacts);
+        contactsAdapter = new ContactsAdapter(contacts, this);
         contactsRecyclerView.setAdapter(contactsAdapter);
     }
 }

@@ -3,7 +3,9 @@ package com.teachersspace.models;
 import androidx.annotation.NonNull;
 
 import com.google.firebase.firestore.DocumentReference;
+import com.google.gson.Gson;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -68,6 +70,14 @@ public class User {
         setUserType(userType);
     }
     public User() {}
+
+    public String serialise() {
+        return new Gson().toJson(this);
+    }
+
+    public static User deserialise(String userSerialised) {
+        return new Gson().fromJson(userSerialised, User.class);
+    }
 
     @NonNull
     @Override

@@ -26,7 +26,7 @@ public class TeacherActivity extends CallEnabledActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_teacher);
 
-        NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment_teacher);
-        NavController navController = navHostFragment.getNavController();
+//        NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment_teacher);
+//        NavController navController = navHostFragment.getNavController();
     }
 }

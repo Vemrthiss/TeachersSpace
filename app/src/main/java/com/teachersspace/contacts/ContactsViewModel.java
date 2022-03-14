@@ -67,17 +67,18 @@ public class ContactsViewModel extends ViewModel {
             List<String> contactsUid = new ArrayList<>(contactsMap.keySet());
             Log.i(TAG, "contactsUid: " + contactsUid.toString());
             // https://stackoverflow.com/questions/5245093/how-do-i-use-comparator-to-define-a-custom-sort-order
-            Comparator<String> lastActivityComparator = (uid1, uid2) -> {
-                Date lastActivity1 = contactsMap.get(uid1);
-                Date lastActivity2 = contactsMap.get(uid2);
-                return lastActivity1.compareTo(lastActivity2);
+            Comparator<User> lastActivityComparator = (user1, user2) -> {
+                Date lastActivity1 = contactsMap.get(user1.getUid());
+                Date lastActivity2 = contactsMap.get(user2.getUid());
+                return lastActivity2.compareTo(lastActivity1); // descending sort, most recent at front of list
             };
-            Collections.sort(contactsUid, lastActivityComparator);
 
-            // based on the sorted string list of uid, convert it into a list of user objects
+            // convert it into a list of user objects
             EventListener<QuerySnapshot> snapshotListener = (snapshot, error) -> {
                 if (snapshot != null) {
                     List<User> contactsObj = snapshot.toObjects(User.class);
+                    // sort it based on last activity
+                    Collections.sort(contactsObj, lastActivityComparator);
                     contactsSorted.setValue(contactsObj);
                 }
             };

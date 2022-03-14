@@ -1,5 +1,6 @@
 package com.teachersspace.contacts;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,7 +15,9 @@ import com.teachersspace.models.User;
 import java.util.List;
 
 public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.ViewHolder> {
+    private static final String TAG = "ContactsAdapter";
     private List<User> contactsList;
+    private ContactsFragment contactsFragment;
 
     /**
      * Provide a reference to the type of views that you are using
@@ -38,8 +41,9 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.ViewHo
      * Initialize the dataset of the Adapter.
      * @param dataSet List<User> containing the data to populate views to be used by RecyclerView.
      */
-    public ContactsAdapter(List<User> dataSet) {
+    public ContactsAdapter(List<User> dataSet, ContactsFragment fragment) {
         contactsList = dataSet;
+        contactsFragment = fragment;
     }
 
     /**
@@ -68,7 +72,9 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.ViewHo
         // Get element from your dataset at this position and replace the
         // contents of the view with that element
         User user = contactsList.get(position);
-        holder.getButtonView().setText(user.getName());
+        Button singleContactButton = holder.getButtonView();
+        singleContactButton.setText(user.getName());
+        singleContactButton.setOnClickListener(contactsFragment.contactsIndividualListenerFactory(position));
     }
     /**
      * @return the size of dataset (invoked by the layout manager)
@@ -82,5 +88,6 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.ViewHo
         contactsList.clear();
         contactsList.addAll(newData);
         this.notifyDataSetChanged();
+        // TODO: https://stackoverflow.com/questions/68602157/it-will-always-be-more-efficient-to-use-more-specific-change-events-if-you-can
     }
 }

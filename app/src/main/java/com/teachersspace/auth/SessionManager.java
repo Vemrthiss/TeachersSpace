@@ -54,10 +54,12 @@ public class SessionManager extends SharedPreferencesManager {
         if (userSerialised.equals("")) {
             return null;
         }
-        return new Gson().fromJson(userSerialised, User.class);
+        return User.deserialise(userSerialised);
+        // return new Gson().fromJson(userSerialised, User.class);
     }
     public void setCurrentUser(User newUser) {
-        String userSerialised = new Gson().toJson(newUser);
+        String userSerialised = newUser.serialise();
+        // String userSerialised = new Gson().toJson(newUser);
         this.sessionObjectEditor.putString(USER_PREF_KEY, userSerialised);
         this.sessionObjectEditor.apply();
     }
