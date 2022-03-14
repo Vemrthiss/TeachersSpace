@@ -12,6 +12,7 @@
     <string name="callee">client identity or phone number</string>
     <string name="answer">Answer</string>
     <string name="decline">Decline</string>
+    <string name="confirm_active_contact">Proceed with calling %1$s?</string>
     <!-- Preference Titles -->
     <string name="messages_header">Messages</string>
     <string name="sync_header">Sync</string>

@@ -8,6 +8,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 
 import android.os.SystemClock;
 import android.util.Log;
@@ -15,6 +17,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Chronometer;
+import android.widget.TextView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.teachersspace.R;
@@ -28,11 +31,14 @@ import com.teachersspace.models.User;
 public class CommunicationsFragment extends Fragment {
     private static final String TAG = "CommunicationsFragment";
 
+    private CommunicationsViewModel communicationsViewModel;
+
     private FloatingActionButton callActionFab;
     private FloatingActionButton hangupActionFab;
     private FloatingActionButton holdActionFab;
     private FloatingActionButton muteActionFab;
     private Chronometer chronometer;
+    private TextView contactNameView;
 
     public interface CommunicationsFragmentProps {
         View.OnClickListener callActionFabClickListener();
@@ -60,11 +66,15 @@ public class CommunicationsFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        // setup communications view model
+        communicationsViewModel = new ViewModelProvider(requireActivity()).get(CommunicationsViewModel.class);
+
         callActionFab = view.findViewById(R.id.call_action_fab);
         hangupActionFab = view.findViewById(R.id.hangup_action_fab);
         holdActionFab = view.findViewById(R.id.hold_action_fab);
         muteActionFab = view.findViewById(R.id.mute_action_fab);
         chronometer = view.findViewById(R.id.chronometer);
+        contactNameView = view.findViewById(R.id.communications_contact_name);
 
         // register click event listeners
         callActionFab.setOnClickListener(props.callActionFabClickListener());
@@ -78,8 +88,10 @@ public class CommunicationsFragment extends Fragment {
         // get contact uid
         Bundle args = getArguments();
         if (args != null) {
-            User contact = User.deserialise(args.getString("contact"));
-            Log.i(TAG, "contact name: " + contact.getName());
+            User activeContact = User.deserialise(args.getString("contact"));
+            Log.i(TAG, "contact name: " + activeContact.getName());
+            contactNameView.setText(activeContact.getName());
+            communicationsViewModel.setActiveContact(activeContact);
         }
     }
 
@@ -130,7 +142,7 @@ public class CommunicationsFragment extends Fragment {
         button.setBackgroundTintList(colorStateList);
     }
 
-//    // TODO: Rename parameter arguments, choose names that match
+    //    // TODO: Rename parameter arguments, choose names that match
 //    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
 //    private static final String ARG_PARAM1 = "param1";
 //    private static final String ARG_PARAM2 = "param2";

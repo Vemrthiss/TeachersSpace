@@ -4,22 +4,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <EditText
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginRight="@dimen/activity_horizontal_margin"
-        android:layout_marginLeft="@dimen/activity_horizontal_margin"
-        android:layout_marginBottom="@dimen/activity_vertical_margin"
-        android:layout_marginTop="@dimen/activity_vertical_margin"
-        android:id="@+id/contact"/>
-
     <TextView
-        android:id="@+id/text_view_id"
+        android:id="@+id/dialog_call_text"
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
         android:layout_marginRight="@dimen/activity_horizontal_margin"
         android:layout_marginLeft="@dimen/activity_horizontal_margin"
-        android:hint="@string/call_hint"
+        android:layout_marginTop="@dimen/activity_vertical_margin"
         android:visibility="visible"/>
 
 </LinearLayout>

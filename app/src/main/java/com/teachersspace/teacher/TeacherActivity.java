@@ -16,9 +16,8 @@ public class TeacherActivity extends CallEnabledActivity {
     private final String TAG = "TeacherActivity";
 
     @Override
-    public int getCommunicationsFragmentContainer() {
-//        return R.id.teacher_communications_fragment_container;
-        return R.id.communications_fragment_teacher;
+    public int getNavFragmentContainer() {
+        return R.id.nav_host_fragment_teacher;
     }
 
     @Override

@@ -26,6 +26,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Chronometer;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -34,15 +35,20 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ProcessLifecycleOwner;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.navigation.fragment.NavHostFragment;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.teachersspace.R;
 import com.teachersspace.auth.SessionManager;
+import com.teachersspace.models.User;
 import com.twilio.audioswitch.AudioDevice;
 import com.twilio.audioswitch.AudioSwitch;
 import com.twilio.voice.Call;
@@ -73,11 +79,6 @@ public abstract class CallEnabledActivity extends AppCompatActivity implements C
     private NotificationManager notificationManager;
 
     private CoordinatorLayout coordinatorLayout; // used for snackbars, the overall layout container for the 5 elements of the fragment
-//    private FloatingActionButton callActionFab;
-//    private FloatingActionButton hangupActionFab;
-//    private FloatingActionButton holdActionFab;
-//    private FloatingActionButton muteActionFab;
-    // private Chronometer chronometer;
 
     private boolean isReceiverRegistered = false;
     private VoiceBroadcastReceiver voiceBroadcastReceiver;
@@ -94,7 +95,16 @@ public abstract class CallEnabledActivity extends AppCompatActivity implements C
     private TwilioTokenManager tokenManager;
 
     private CommunicationsFragment communicationsFragment;
-    public abstract int getCommunicationsFragmentContainer();
+    public abstract int getNavFragmentContainer();
+    private CommunicationsViewModel communicationsViewModel;
+    private User activeContact;
+    private class NewActiveContactCallback implements Observer<User> {
+        @Override
+        public void onChanged(User user) {
+            activeContact = user;
+            getCommunicationsFragment();
+        }
+    }
 
     // twilio access token
     private String getStoredTwilioToken() {
@@ -186,19 +196,6 @@ public abstract class CallEnabledActivity extends AppCompatActivity implements C
                 | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
                 | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-//        coordinatorLayout = findViewById(R.id.coordinator_layout);
-//        callActionFab = findViewById(R.id.call_action_fab);
-//        hangupActionFab = findViewById(R.id.hangup_action_fab);
-//        holdActionFab = findViewById(R.id.hold_action_fab);
-//        muteActionFab = findViewById(R.id.mute_action_fab);
-//        chronometer = findViewById(R.id.chronometer);
-
-        // register click event listeners
-//        callActionFab.setOnClickListener(callActionFabClickListener());
-//        hangupActionFab.setOnClickListener(hangupActionFabClickListener());
-//        holdActionFab.setOnClickListener(holdActionFabClickListener());
-//        muteActionFab.setOnClickListener(muteActionFabClickListener());
-
         notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
         /*
@@ -233,11 +230,21 @@ public abstract class CallEnabledActivity extends AppCompatActivity implements C
         audioSwitch = new AudioSwitch(getApplicationContext());
         savedVolumeControlStream = getVolumeControlStream();
         setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
+
+        // setup communications vm, shared with communications fragment, handles active contact
+        communicationsViewModel = new ViewModelProvider(this).get(CommunicationsViewModel.class);
+        communicationsViewModel.getActiveContact().observe(this, new NewActiveContactCallback());
     }
 
     private void getCommunicationsFragment() {
         if (communicationsFragment == null) {
-            communicationsFragment = (CommunicationsFragment) getSupportFragmentManager().findFragmentById(getCommunicationsFragmentContainer());
+            NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager().findFragmentById(getNavFragmentContainer());
+            if (navHostFragment != null) {
+                Fragment currentFragment = navHostFragment.getChildFragmentManager().getFragments().get(0);
+                if (currentFragment instanceof CommunicationsFragment) {
+                    communicationsFragment = (CommunicationsFragment) currentFragment;
+                }
+            }
         }
     }
     private void getCoordinatorLayout() {
@@ -356,10 +363,8 @@ public abstract class CallEnabledActivity extends AppCompatActivity implements C
 
     private DialogInterface.OnClickListener callClickListener() {
         return (dialog, which) -> {
-            // TODO: Place a call
-            EditText contact = ((AlertDialog) dialog).findViewById(R.id.contact);
             HashMap<String, String> params = new HashMap<>();
-            params.put("to", contact.getText().toString());
+            params.put("to", activeContact.getUid()); // calls the active contact
             params.put("from", SessionManager.getUserUid());
             accessToken = getStoredTwilioToken();
             ConnectOptions connectOptions = new ConnectOptions.Builder(accessToken)
@@ -758,7 +763,7 @@ public abstract class CallEnabledActivity extends AppCompatActivity implements C
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(activity);
 
         alertDialogBuilder.setIcon(R.drawable.ic_call_black_24dp);
-        alertDialogBuilder.setTitle("Call");
+        alertDialogBuilder.setTitle("Confirm Call");
         alertDialogBuilder.setPositiveButton("Call", callClickListener);
         alertDialogBuilder.setNegativeButton("Cancel", cancelClickListener);
         alertDialogBuilder.setCancelable(false);
@@ -768,8 +773,10 @@ public abstract class CallEnabledActivity extends AppCompatActivity implements C
                 R.layout.dialog_call,
                 activity.findViewById(android.R.id.content),
                 false);
-        final EditText contact = dialogView.findViewById(R.id.contact);
-        contact.setHint(R.string.callee);
+        final TextView confirmationCallActiveContact = dialogView.findViewById(R.id.dialog_call_text);
+        final CallEnabledActivity activityRef = (CallEnabledActivity) activity;
+        final String textToDisplay = activity.getString(R.string.confirm_active_contact, activityRef.activeContact.getName());
+        confirmationCallActiveContact.setText(textToDisplay);
         alertDialogBuilder.setView(dialogView);
 
         return alertDialogBuilder.create();
