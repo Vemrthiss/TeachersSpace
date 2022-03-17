@@ -8,6 +8,8 @@
     <string name="dashboard_title">Dashboard</string>
     <string name="audio_device">Audio Device</string>
     <string name="select_device">Select Audio Device</string>
+    <string name="contacts_header">Contacts</string>
+    <string name="search_hint">Search</string>
     <string name="call_hint">Dial a client name or phone number. Leaving the field empty results in an automated response.</string>
     <string name="callee">client identity or phone number</string>
     <string name="answer">Answer</string>

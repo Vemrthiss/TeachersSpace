@@ -5,6 +5,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -26,6 +27,7 @@ import java.util.List;
 public class ContactsFragment extends Fragment {
     private static final String TAG = "ContactsFragment";
     private SessionManager sessionManager;
+    private EditText searchBar;
 
     private ContactsViewModel vm;
     private ContactsAdapter contactsAdapter;
@@ -48,7 +50,7 @@ public class ContactsFragment extends Fragment {
             NavDirections directions = new NavDirections() {
                 @Override
                 public int getActionId() {
-                    return R.id.teacher_navigate_single_contact_action;
+                    return R.id.navigate_single_contact_action;
                 }
 
                 @NonNull
@@ -59,7 +61,7 @@ public class ContactsFragment extends Fragment {
                     return args;
                 }
             };
-            NavHostFragment.findNavController(ContactsFragment.this).navigate(directions);
+            navigate(directions);
         }
     }
 
@@ -87,6 +89,8 @@ public class ContactsFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         this.sessionManager = new SessionManager(getContext());
+        searchBar = view.findViewById(R.id.search_bar);
+        searchBar.setOnFocusChangeListener(navigateToSearch());
 
         // setup viewmodel and callbacks
         vm = new ViewModelProvider(requireActivity()).get(ContactsViewModel.class);
@@ -97,5 +101,30 @@ public class ContactsFragment extends Fragment {
         contactsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         contactsAdapter = new ContactsAdapter(contacts, this);
         contactsRecyclerView.setAdapter(contactsAdapter);
+    }
+
+    private View.OnFocusChangeListener navigateToSearch() {
+        return (view, hasFocus) -> {
+            if (hasFocus) {
+                Log.i(TAG, "navigateToSearch");
+                NavDirections directions = new NavDirections() {
+                    @NonNull
+                    @Override
+                    public Bundle getArguments() {
+                        return new Bundle();
+                    }
+
+                    @Override
+                    public int getActionId() {
+                        return R.id.navigate_search_action;
+                    }
+                };
+                navigate(directions);
+            }
+        };
+    }
+
+    private void navigate(NavDirections directions) {
+        NavHostFragment.findNavController(ContactsFragment.this).navigate(directions);
     }
 }

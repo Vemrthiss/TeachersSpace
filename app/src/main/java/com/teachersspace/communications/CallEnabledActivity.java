@@ -531,7 +531,7 @@ public abstract class CallEnabledActivity extends AppCompatActivity implements C
                                 NavDirections directions = new NavDirections() {
                                     @Override
                                     public int getActionId() {
-                                        return R.id.teacher_navigate_single_contact_action;
+                                        return R.id.navigate_single_contact_action;
                                     }
 
                                     @NonNull
@@ -830,7 +830,7 @@ public abstract class CallEnabledActivity extends AppCompatActivity implements C
                                                 final Activity activity) {
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(activity);
 
-        alertDialogBuilder.setIcon(R.drawable.ic_call_black_24dp);
+        alertDialogBuilder.setIcon(R.drawable.ic_call_white_24dp);
         alertDialogBuilder.setTitle("Confirm Call");
         alertDialogBuilder.setPositiveButton("Call", callClickListener);
         alertDialogBuilder.setNegativeButton("Cancel", cancelClickListener);

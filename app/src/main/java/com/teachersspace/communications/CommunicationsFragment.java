@@ -43,6 +43,7 @@ public class CommunicationsFragment extends Fragment {
     private TextView contactNameActiveCallView;
     private ConstraintLayout inactiveCallLayout;
     private ConstraintLayout activeCallLayout;
+    private FloatingActionButton backActionFab;
 
     public interface CommunicationsFragmentProps {
         View.OnClickListener callActionFabClickListener();
@@ -82,12 +83,14 @@ public class CommunicationsFragment extends Fragment {
         contactNameActiveCallView = view.findViewById(R.id.communications_contact_name_active_call);
         inactiveCallLayout = view.findViewById(R.id.communications_no_call_container);
         activeCallLayout = view.findViewById(R.id.communications_with_call_container);
+        backActionFab = view.findViewById(R.id.back_action_fab);
 
         // register click event listeners
         callActionFab.setOnClickListener(props.callActionFabClickListener());
         hangupActionFab.setOnClickListener(props.hangupActionFabClickListener());
         holdActionFab.setOnClickListener(props.holdActionFabClickListener());
         muteActionFab.setOnClickListener(props.muteActionFabClickListener());
+        backActionFab.setOnClickListener(goBack());
 
         // setup the UI
         resetUI();
@@ -159,6 +162,10 @@ public class CommunicationsFragment extends Fragment {
             button = holdActionFab; // default
         }
         button.setBackgroundTintList(colorStateList);
+    }
+
+    private View.OnClickListener goBack() {
+        return view -> requireActivity().onBackPressed();
     }
 
     //    // TODO: Rename parameter arguments, choose names that match
