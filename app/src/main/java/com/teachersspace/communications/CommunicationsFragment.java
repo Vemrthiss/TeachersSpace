@@ -133,7 +133,9 @@ public class CommunicationsFragment extends Fragment {
         muteActionFab.setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.ic_mic_white_24dp));
         holdActionFab.hide();
         holdActionFab.setBackgroundTintList(ColorStateList
-                .valueOf(ContextCompat.getColor(getContext(), R.color.colorAccent)));
+                .valueOf(ContextCompat.getColor(getContext(), R.color.blue_200)));
+        muteActionFab.setBackgroundTintList(ColorStateList
+                .valueOf(ContextCompat.getColor(getContext(), R.color.blue_200)));
         muteActionFab.hide();
         hangupActionFab.hide();
         chronometer.setVisibility(View.INVISIBLE);
@@ -144,9 +146,9 @@ public class CommunicationsFragment extends Fragment {
         // Set fab as pressed when call is on hold
         ColorStateList colorStateList = enabled ?
                 ColorStateList.valueOf(ContextCompat.getColor(getContext(),
-                        R.color.colorPrimaryDark)) :
+                        R.color.brown_200)) :
                 ColorStateList.valueOf(ContextCompat.getColor(getContext(),
-                        R.color.colorAccent));
+                        R.color.blue_200));
 
         FloatingActionButton button;
         if (buttonWhich.equals("hold")) {
