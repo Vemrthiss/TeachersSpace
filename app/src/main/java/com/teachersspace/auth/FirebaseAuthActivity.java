@@ -5,6 +5,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -91,15 +92,9 @@ public class FirebaseAuthActivity extends AppCompatActivity {
         }
     }
 
-    public void signOut() {
-        this.sessionManager.clearCurrentUser();
+    public static void signOut(Context context, OnCompleteListener<Void> callback) {
         AuthUI.getInstance()
-                .signOut(this)
-                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                    public void onComplete(@NonNull Task<Void> task) {
-                        // ...
-                        Log.d("FirebaseSignOutFunction", "signed out!");
-                    }
-                });
+                .signOut(context)
+                .addOnCompleteListener(callback);
     }
 }
