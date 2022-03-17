@@ -11,7 +11,9 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
@@ -19,7 +21,10 @@ import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.ProcessLifecycleOwner;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.teachersspace.auth.SessionManager;
+import com.teachersspace.data.UserRepository;
 import com.teachersspace.models.User;
 import com.teachersspace.parent.ParentActivity;
 import com.teachersspace.student.StudentActivity;
@@ -28,12 +33,17 @@ import com.twilio.voice.CallInvite;
 
 import com.teachersspace.R;
 
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 /**
  * This service handles the notifications from outside the app, not the in-app dialog
  */
 public class IncomingCallNotificationService extends Service {
     private static final String TAG = IncomingCallNotificationService.class.getSimpleName();
     private SessionManager sessionManager;
+    private final UserRepository userRepository = new UserRepository();
 
     private Class<?> getUserActivityClass() {
         User user = this.sessionManager.getCurrentUser();
@@ -51,9 +61,9 @@ public class IncomingCallNotificationService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d(TAG, "incoming call notification service started");
         this.sessionManager = new SessionManager(this);
         String action = intent.getAction();
+        Log.d(TAG, "incoming call notification service started with action: " + action);
 
         if (action != null) {
             CallInvite callInvite = intent.getParcelableExtra(Constants.INCOMING_CALL_INVITE);
@@ -83,7 +93,7 @@ public class IncomingCallNotificationService extends Service {
         return null;
     }
 
-    private Notification createNotification(CallInvite callInvite, int notificationId, int channelImportance) {
+    private Notification createNotification(CallInvite callInvite, int notificationId, int channelImportance, String callerName) {
         Log.d(TAG, "createNotification is called");
         /*
           call the different activities based on user type, and each activity then calls on the fragment itself
@@ -107,7 +117,7 @@ public class IncomingCallNotificationService extends Service {
         extras.putString(Constants.CALL_SID_KEY, callInvite.getCallSid());
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            return buildNotification(callInvite.getFrom() + " is calling.",
+            return buildNotification(callerName + " is calling.",
                     pendingIntent,
                     extras,
                     callInvite,
@@ -118,7 +128,7 @@ public class IncomingCallNotificationService extends Service {
             return new NotificationCompat.Builder(this)
                     .setSmallIcon(R.drawable.ic_call_end_white_24dp)
                     .setContentTitle(getString(R.string.app_name))
-                    .setContentText(callInvite.getFrom() + " is calling.")
+                    .setContentText(callerName + " is calling.")
                     .setAutoCancel(true)
                     .setExtras(extras)
                     .setContentIntent(pendingIntent)
@@ -222,26 +232,48 @@ public class IncomingCallNotificationService extends Service {
 
     @TargetApi(Build.VERSION_CODES.O)
     private void setCallInProgressNotification(CallInvite callInvite, int notificationId) {
-        if (isAppVisible()) {
-            Log.i(TAG, "setCallInProgressNotification - app is visible.");
-            startForeground(notificationId, createNotification(callInvite, notificationId, NotificationManager.IMPORTANCE_LOW));
-        } else {
-            Log.i(TAG, "setCallInProgressNotification - app is NOT visible.");
-            startForeground(notificationId, createNotification(callInvite, notificationId, NotificationManager.IMPORTANCE_HIGH));
-        }
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        Looper mainLooper = Looper.getMainLooper();
+        Handler handler = new Handler(mainLooper);
+        final String callerUid = CallEnabledActivity.getUidFromTwilioFrom(callInvite.getFrom());
+        executor.execute(() -> {
+            OnCompleteListener<QuerySnapshot> callback = task -> {
+                if (task.isSuccessful()) {
+                    QuerySnapshot result = task.getResult();
+                    if (result != null && !result.isEmpty()) {
+                        List<User> users = result.toObjects(User.class);
+                        User callerUser = users.get(0);
+
+                        handler.post(() -> {
+                            String callerName = callerUser.getName();
+                            if (isAppVisible()) {
+                                Log.i(TAG, "setCallInProgressNotification - app is visible.");
+                                startForeground(notificationId, createNotification(callInvite, notificationId, NotificationManager.IMPORTANCE_LOW, callerName));
+                            } else {
+                                Log.i(TAG, "setCallInProgressNotification - app is NOT visible.");
+                                startForeground(notificationId, createNotification(callInvite, notificationId, NotificationManager.IMPORTANCE_HIGH, callerName));
+                            }
+                        });
+                    }
+                } else {
+                    Log.d(TAG, "Error getting documents: ", task.getException());
+                }
+            };
+            userRepository.getUserByUid(callerUid, callback);
+        });
     }
 
     /**
-     * Send the CallInvite to the VoiceActivity. Start the activity if it is not running already.
+     * Send the CallInvite to the relevant user activity (CallEnabledActivity).
+     * Start the activity if it is not running already.
      * @param callInvite
      * @param notificationId
      */
     private void sendCallInviteToActivity(CallInvite callInvite, int notificationId) {
-        if (Build.VERSION.SDK_INT >= 29 && !isAppVisible()) {
-            return;
-        }
-        // TODO: same thing here, see above TODO for starting activity
-        Intent intent = new Intent(this, TeacherActivity.class);
+//        if (Build.VERSION.SDK_INT >= 29 && !isAppVisible()) {
+//            return;
+//        }
+        Intent intent = new Intent(this, getUserActivityClass());
         intent.setAction(Constants.ACTION_INCOMING_CALL);
         intent.putExtra(Constants.INCOMING_CALL_NOTIFICATION_ID, notificationId);
         intent.putExtra(Constants.INCOMING_CALL_INVITE, callInvite);

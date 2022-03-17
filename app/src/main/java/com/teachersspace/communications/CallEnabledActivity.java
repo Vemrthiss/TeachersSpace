@@ -15,6 +15,8 @@ import android.content.res.ColorStateList;
 import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.SystemClock;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -41,13 +43,19 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ProcessLifecycleOwner;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.navigation.NavController;
+import androidx.navigation.NavDirections;
 import androidx.navigation.fragment.NavHostFragment;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.teachersspace.R;
 import com.teachersspace.auth.SessionManager;
+import com.teachersspace.data.UserRepository;
 import com.teachersspace.models.User;
 import com.twilio.audioswitch.AudioDevice;
 import com.twilio.audioswitch.AudioSwitch;
@@ -65,6 +73,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import kotlin.Unit;
 
@@ -94,6 +104,8 @@ public abstract class CallEnabledActivity extends AppCompatActivity implements C
     private String accessToken;
     private TwilioTokenManager tokenManager;
 
+    private final UserRepository userRepository = new UserRepository();
+
     private CommunicationsFragment communicationsFragment;
     public abstract int getNavFragmentContainer();
     private CommunicationsViewModel communicationsViewModel;
@@ -112,6 +124,12 @@ public abstract class CallEnabledActivity extends AppCompatActivity implements C
             tokenManager = new TwilioTokenManager(this, SessionManager.getUserUid());
         }
         return tokenManager.getTwilioAccessToken();
+    }
+    public static String getUidFromTwilioFrom(String callFrom) {
+        if (callFrom == null) {
+            return "";
+        }
+        return callFrom.replace("client:", "");
     }
 
     // TODO: review!
@@ -305,13 +323,14 @@ public abstract class CallEnabledActivity extends AppCompatActivity implements C
             String action = intent.getAction();
             activeCallInvite = intent.getParcelableExtra(Constants.INCOMING_CALL_INVITE);
             activeCallNotificationId = intent.getIntExtra(Constants.INCOMING_CALL_NOTIFICATION_ID, 0);
-
+            final String callFrom = (activeCallInvite == null) ? null : activeCallInvite.getFrom();
+            Log.i(TAG, "callFrom: " + callFrom);
             switch (action) {
                 case Constants.ACTION_INCOMING_CALL:
-                    handleIncomingCall();
+                    handleIncomingCall(callFrom);
                     break;
                 case Constants.ACTION_INCOMING_CALL_NOTIFICATION:
-                    showIncomingCallDialog();
+                    showIncomingCallDialog(callFrom);
                     break;
                 case Constants.ACTION_CANCEL_CALL:
                     handleCancel();
@@ -320,7 +339,7 @@ public abstract class CallEnabledActivity extends AppCompatActivity implements C
                     registerForCallInvites();
                     break;
                 case Constants.ACTION_ACCEPT:
-                    answer();
+                    answer(callFrom);
                     break;
                 default:
                     break;
@@ -328,24 +347,51 @@ public abstract class CallEnabledActivity extends AppCompatActivity implements C
         }
     }
 
-    private void handleIncomingCall() {
+    private void handleIncomingCall(String callFrom) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-            showIncomingCallDialog();
+            showIncomingCallDialog(callFrom);
         } else {
             if (isAppVisible()) {
-                showIncomingCallDialog();
+                showIncomingCallDialog(callFrom);
             }
         }
     }
 
-    private void showIncomingCallDialog() {
-        SoundPoolManager.getInstance(this).playRinging();
+    private void showIncomingCallDialog(String callFrom) {
         if (activeCallInvite != null) {
-            alertDialog = createIncomingCallDialog(CallEnabledActivity.this,
+            AlertDialog.Builder alertDialogBuilder = createIncomingCallDialog(CallEnabledActivity.this,
                     activeCallInvite,
                     answerCallClickListener(),
                     cancelCallClickListener());
-            alertDialog.show();
+            if (callFrom != null) {
+                final String callerUid = getUidFromTwilioFrom(callFrom);
+                ExecutorService executor = Executors.newSingleThreadExecutor();
+                Looper mainLooper = Looper.getMainLooper();
+                Handler handler = new Handler(mainLooper);
+                executor.execute(() -> {
+                    // perform async tasks here
+                    OnCompleteListener<QuerySnapshot> callback = task -> {
+                        if (task.isSuccessful()) {
+                            QuerySnapshot result = task.getResult();
+                            if (result != null && !result.isEmpty()) {
+                                List<User> users = result.toObjects(User.class);
+                                User user = users.get(0);
+                                String userName = user.getName();
+
+                                handler.post(() -> {
+                                    SoundPoolManager.getInstance(this).playRinging();
+                                    alertDialogBuilder.setMessage(userName + " is calling");
+                                    alertDialog = alertDialogBuilder.create();
+                                    alertDialog.show();
+                                });
+                            }
+                        } else {
+                            Log.d(TAG, "Error getting documents: ", task.getException());
+                        }
+                    };
+                    userRepository.getUserByUid(callerUid, callback);
+                });
+            }
         }
     }
 
@@ -392,7 +438,7 @@ public abstract class CallEnabledActivity extends AppCompatActivity implements C
         };
     }
 
-    public static AlertDialog createIncomingCallDialog(
+    public static AlertDialog.Builder createIncomingCallDialog(
             Context context,
             CallInvite callInvite,
             DialogInterface.OnClickListener answerCallClickListener,
@@ -402,8 +448,7 @@ public abstract class CallEnabledActivity extends AppCompatActivity implements C
         alertDialogBuilder.setTitle("Incoming Call");
         alertDialogBuilder.setPositiveButton("Accept", answerCallClickListener);
         alertDialogBuilder.setNegativeButton("Reject", cancelClickListener);
-        alertDialogBuilder.setMessage(callInvite.getFrom() + " is calling with " + callInvite.getCallerInfo().isVerified() + " status");
-        return alertDialogBuilder.create();
+        return alertDialogBuilder;
     }
 
     private boolean isAppVisible() {
@@ -461,11 +506,62 @@ public abstract class CallEnabledActivity extends AppCompatActivity implements C
     /**
      * Accept an incoming Call
      */
-    private void answer() {
+    private void answer(String callFrom) {
         SoundPoolManager.getInstance(this).stopRinging();
         activeCallInvite.accept(this, callListener);
         notificationManager.cancel(activeCallNotificationId);
         stopService(new Intent(getApplicationContext(), IncomingCallNotificationService.class));
+
+        if (communicationsFragment == null) {
+            // navigate to communications fragment because it is null
+            final String callerUid = getUidFromTwilioFrom(callFrom);
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+            Looper mainLooper = Looper.getMainLooper();
+            Handler handler = new Handler(mainLooper);
+            executor.execute(() -> {
+                // perform async tasks here
+                OnCompleteListener<QuerySnapshot> callback = task -> {
+                    if (task.isSuccessful()) {
+                        QuerySnapshot result = task.getResult();
+                        if (result != null && !result.isEmpty()) {
+                            List<User> users = result.toObjects(User.class);
+                            User callerUser = users.get(0);
+
+                            handler.post(() -> {
+                                NavDirections directions = new NavDirections() {
+                                    @Override
+                                    public int getActionId() {
+                                        return R.id.teacher_navigate_single_contact_action;
+                                    }
+
+                                    @NonNull
+                                    @Override
+                                    public Bundle getArguments() {
+                                        Bundle args = new Bundle();
+                                        args.putString("contact", callerUser.serialise());
+                                        args.putBoolean("externalAccept", true);
+                                        return args;
+                                    }
+                                };
+                                NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager().findFragmentById(getNavFragmentContainer());
+                                if (navHostFragment != null) {
+                                    NavController navController = navHostFragment.getNavController();
+                                    navController.navigate(directions);
+                                    if (alertDialog != null && alertDialog.isShowing()) {
+                                        alertDialog.dismiss();
+                                    }
+                                }
+                            });
+                        }
+                    } else {
+                        Log.d(TAG, "Error getting documents: ", task.getException());
+                    }
+                };
+                userRepository.getUserByUid(callerUid, callback);
+            });
+            return;
+        }
+
         getCommunicationsFragment();
         Log.i(TAG, "i reached here" + String.valueOf(communicationsFragment == null));
         communicationsFragment.setCallUI();
@@ -511,34 +607,6 @@ public abstract class CallEnabledActivity extends AppCompatActivity implements C
                         R.color.colorAccent));
         button.setBackgroundTintList(colorStateList);
     }
-
-//    /*
-//     * The UI state when there is an active call
-//     */
-//    private void setCallUI() {
-//        callActionFab.hide();
-//        hangupActionFab.show();
-//        holdActionFab.show();
-//        muteActionFab.show();
-//        chronometer.setVisibility(View.VISIBLE);
-//        chronometer.setBase(SystemClock.elapsedRealtime());
-//        chronometer.start();
-//    }
-
-//    /*
-//     * Reset UI elements
-//     */
-//    private void resetUI() {
-//        callActionFab.show();
-//        muteActionFab.setImageDrawable(ContextCompat.getDrawable(CallEnabledActivity.this, R.drawable.ic_mic_white_24dp));
-//        holdActionFab.hide();
-//        holdActionFab.setBackgroundTintList(ColorStateList
-//                .valueOf(ContextCompat.getColor(CallEnabledActivity.this, R.color.colorAccent)));
-//        muteActionFab.hide();
-//        hangupActionFab.hide();
-//        chronometer.setVisibility(View.INVISIBLE);
-//        chronometer.stop();
-//    }
 
     private Call.Listener callListener() {
         return new Call.Listener() {

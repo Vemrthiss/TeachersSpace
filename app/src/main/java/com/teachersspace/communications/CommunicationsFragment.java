@@ -92,6 +92,11 @@ public class CommunicationsFragment extends Fragment {
             Log.i(TAG, "contact name: " + activeContact.getName());
             contactNameView.setText(activeContact.getName());
             communicationsViewModel.setActiveContact(activeContact);
+
+            boolean externalAccept = args.getBoolean("externalAccept");
+            if (externalAccept) {
+                setCallUI();
+            }
         }
     }
 
