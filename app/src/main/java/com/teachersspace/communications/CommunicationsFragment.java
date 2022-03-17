@@ -6,6 +6,7 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
@@ -39,6 +40,9 @@ public class CommunicationsFragment extends Fragment {
     private FloatingActionButton muteActionFab;
     private Chronometer chronometer;
     private TextView contactNameView;
+    private TextView contactNameActiveCallView;
+    private ConstraintLayout inactiveCallLayout;
+    private ConstraintLayout activeCallLayout;
 
     public interface CommunicationsFragmentProps {
         View.OnClickListener callActionFabClickListener();
@@ -75,6 +79,9 @@ public class CommunicationsFragment extends Fragment {
         muteActionFab = view.findViewById(R.id.mute_action_fab);
         chronometer = view.findViewById(R.id.chronometer);
         contactNameView = view.findViewById(R.id.communications_contact_name);
+        contactNameActiveCallView = view.findViewById(R.id.communications_contact_name_active_call);
+        inactiveCallLayout = view.findViewById(R.id.communications_no_call_container);
+        activeCallLayout = view.findViewById(R.id.communications_with_call_container);
 
         // register click event listeners
         callActionFab.setOnClickListener(props.callActionFabClickListener());
@@ -89,8 +96,9 @@ public class CommunicationsFragment extends Fragment {
         Bundle args = getArguments();
         if (args != null) {
             User activeContact = User.deserialise(args.getString("contact"));
-            Log.i(TAG, "contact name: " + activeContact.getName());
-            contactNameView.setText(activeContact.getName());
+            String activeContactName = activeContact.getName();
+            contactNameView.setText(activeContactName);
+            contactNameActiveCallView.setText(activeContactName);
             communicationsViewModel.setActiveContact(activeContact);
 
             boolean externalAccept = args.getBoolean("externalAccept");
@@ -104,6 +112,8 @@ public class CommunicationsFragment extends Fragment {
      * The UI state when there is an active call
      */
     public void setCallUI() {
+        inactiveCallLayout.setVisibility(View.INVISIBLE);
+        activeCallLayout.setVisibility(View.VISIBLE);
         callActionFab.hide();
         hangupActionFab.show();
         holdActionFab.show();
@@ -117,6 +127,8 @@ public class CommunicationsFragment extends Fragment {
      * Reset UI elements
      */
     public void resetUI() {
+        inactiveCallLayout.setVisibility(View.VISIBLE);
+        activeCallLayout.setVisibility(View.INVISIBLE);
         callActionFab.show();
         muteActionFab.setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.ic_mic_white_24dp));
         holdActionFab.hide();
