@@ -91,6 +91,12 @@ public class User {
                 '}';
     }
 
+    /**
+     * Converts the object to a map representation
+     * @deprecated not using this method anymore to put to firebase
+     * @return a map of instance properties as keys and its values as the map values.
+     */
+    @Deprecated
     public Map<String, Object> convertToMap() {
         Map<String, Object> document = new HashMap<>();
         document.put("uid", getUid());
