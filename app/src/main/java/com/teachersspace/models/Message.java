@@ -6,6 +6,7 @@ import com.google.gson.Gson;
 
 import java.util.Date;
 import java.util.Map;
+import java.util.UUID;
 
 public class Message {
     private String uid;
@@ -62,14 +63,15 @@ public class Message {
         this.edited = editedDateTime;
     }
 
-    public Message(String uid, String body, Map<String, String> users, Date sent, Date edited) {
-        this(uid, body);
+    public Message(String body, Map<String, String> users, Date sent, Date edited) {
+        this(body);
         setUsers(users);
         setSent(sent);
         setEdited(edited);
     }
-    public Message(String uid, String body) {
-        setUid(uid);
+    public Message(String body) {
+        String randomUid = UUID.randomUUID().toString(); // random uuid as message uid/document id in firestore
+        setUid(randomUid);
         setBody(body);
     }
     public Message() {}
