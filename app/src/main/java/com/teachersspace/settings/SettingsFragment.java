@@ -46,8 +46,6 @@ public class SettingsFragment extends Fragment {
 
         @Override
         public void onChanged(Map<TimePickerFragment.OfficeHourType, Date> newOfficeHours) {
-            Log.d(TAG, "office hours updated");
-
             Date startOfficeHours = newOfficeHours.get(TimePickerFragment.OfficeHourType.START);
             Date endOfficeHours = newOfficeHours.get(TimePickerFragment.OfficeHourType.END);
             Calendar startCalendar = Calendar.getInstance();
@@ -58,8 +56,8 @@ public class SettingsFragment extends Fragment {
             if (endOfficeHours != null) {
                 endCalendar.setTime(endOfficeHours);
             }
-            String startTiming = formatDigits(Integer.toString(startCalendar.get(Calendar.HOUR_OF_DAY))) + ":" + formatDigits(Integer.toString(startCalendar.get(Calendar.SECOND)));
-            String endTiming = formatDigits(Integer.toString(endCalendar.get(Calendar.HOUR_OF_DAY))) + ":" + formatDigits(Integer.toString(endCalendar.get(Calendar.SECOND)));
+            String startTiming = formatDigits(Integer.toString(startCalendar.get(Calendar.HOUR_OF_DAY))) + ":" + formatDigits(Integer.toString(startCalendar.get(Calendar.MINUTE)));
+            String endTiming = formatDigits(Integer.toString(endCalendar.get(Calendar.HOUR_OF_DAY))) + ":" + formatDigits(Integer.toString(endCalendar.get(Calendar.MINUTE)));
 
             Activity activity = requireActivity();
             final String startOfficeHoursText = activity.getString(R.string.start_office_hours, startTiming);

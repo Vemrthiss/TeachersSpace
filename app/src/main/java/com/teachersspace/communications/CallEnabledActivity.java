@@ -68,6 +68,7 @@ import com.twilio.voice.RegistrationListener;
 import com.twilio.voice.Voice;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -115,6 +116,13 @@ public abstract class CallEnabledActivity extends AppCompatActivity implements C
         public void onChanged(User user) {
             activeContact = user;
             getCommunicationsFragment();
+        }
+    }
+    private boolean activeContactUncontactable;
+    private class NewActiveContactContactableCallback implements Observer<Boolean> {
+        @Override
+        public void onChanged(Boolean isOutsideOfficeHours) {
+            activeContactUncontactable = isOutsideOfficeHours;
         }
     }
 
@@ -252,6 +260,7 @@ public abstract class CallEnabledActivity extends AppCompatActivity implements C
         // setup communications vm, shared with communications fragment, handles active contact
         communicationsViewModel = new ViewModelProvider(this).get(CommunicationsViewModel.class);
         communicationsViewModel.getActiveContact().observe(this, new NewActiveContactCallback());
+        communicationsViewModel.getIsOutsideOfficeHours().observe(this, new NewActiveContactContactableCallback());
     }
 
     private void getCommunicationsFragment() {
@@ -288,7 +297,17 @@ public abstract class CallEnabledActivity extends AppCompatActivity implements C
 
     public View.OnClickListener callActionFabClickListener() {
         return v -> {
-            alertDialog = createCallDialog(callClickListener(), cancelCallClickListener(), CallEnabledActivity.this);
+            if (activeContactUncontactable) {
+                DialogInterface.OnClickListener dismissDialog = (dialogInterface, i) -> {
+                    if (alertDialog != null && alertDialog.isShowing()) {
+                        alertDialog.dismiss();
+                    }
+                };
+
+                alertDialog = createNoCallDialog(dismissDialog, CallEnabledActivity.this);
+            } else {
+                alertDialog = createCallDialog(callClickListener(), cancelCallClickListener(), CallEnabledActivity.this);
+            }
             alertDialog.show();
         };
     }
@@ -409,6 +428,25 @@ public abstract class CallEnabledActivity extends AppCompatActivity implements C
 
     private DialogInterface.OnClickListener callClickListener() {
         return (dialog, which) -> {
+            // to check during runtime if teacher can be called
+            // this check is run in the case when the UI does not change to the disabled logo
+            // due to user staying on the fragment just as the contactable timing crosses the boundary to uncontactable
+            // in general, good to check everytime before calling
+            // (check here only because for calling out)
+            if (activeContact.getUserType() == User.UserType.TEACHER) {
+                boolean cannotCallTeacher = false;
+                if (activeContact.getOfficeStart() != null && activeContact.getOfficeEnd() != null) {
+                    cannotCallTeacher = CommunicationsViewModel.computeIsOutsideOfficeHours(activeContact.getOfficeStart(), activeContact.getOfficeEnd());
+                }
+                if (cannotCallTeacher) {
+                    alertDialog.dismiss();
+                    Snackbar.make(findViewById(R.id.coordinator_layout),
+                            "Teacher is not contactable, please refer to his/her office hours.",
+                            Snackbar.LENGTH_LONG).show();
+                    return;
+                }
+            }
+
             HashMap<String, String> params = new HashMap<>();
             params.put("to", activeContact.getUid()); // calls the active contact
             params.put("from", SessionManager.getUserUid());
@@ -849,6 +887,22 @@ public abstract class CallEnabledActivity extends AppCompatActivity implements C
 
         return alertDialogBuilder.create();
 
+    }
+
+    private static AlertDialog createNoCallDialog(final DialogInterface.OnClickListener cancelClickListener, final Activity activity) {
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(activity);
+        alertDialogBuilder.setTitle("Outside Office Hours");
+        alertDialogBuilder.setNegativeButton("Dismiss", cancelClickListener);
+        alertDialogBuilder.setCancelable(false);
+
+        LayoutInflater li = LayoutInflater.from(activity);
+        View dialogView = li.inflate(
+                R.layout.dialog_no_call,
+                activity.findViewById(android.R.id.content),
+                false);
+
+        alertDialogBuilder.setView(dialogView);
+        return alertDialogBuilder.create();
     }
 
     @Override

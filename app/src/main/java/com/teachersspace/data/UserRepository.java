@@ -11,6 +11,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.teachersspace.models.User;
 
@@ -43,9 +44,9 @@ public class UserRepository extends SingleFirebaseCollectionRepository {
                 .addOnFailureListener(onFailureListener);
     }
 
-    public void watchSingleUser(String uid, EventListener<DocumentSnapshot> watchCallback) {
+    public ListenerRegistration watchSingleUser(String uid, EventListener<DocumentSnapshot> watchCallback) {
         DocumentReference userDocRef = getCollection().document(uid); // since user document ids are their UIDs
-        userDocRef.addSnapshotListener(watchCallback);
+        return userDocRef.addSnapshotListener(watchCallback);
     }
 
     /**

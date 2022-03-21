@@ -24,15 +24,15 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.teachersspace.R;
 import com.teachersspace.models.User;
 
-///**
-// * A simple {@link Fragment} subclass.
-// * Use the {@link CommunicationsFragment#newInstance} factory method to
-// * create an instance of this fragment.
-// */
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+
+
 public class CommunicationsFragment extends Fragment {
     private static final String TAG = "CommunicationsFragment";
 
-    private CommunicationsViewModel communicationsViewModel;
+    private CommunicationsViewModel vm;
 
     private FloatingActionButton callActionFab;
     private FloatingActionButton hangupActionFab;
@@ -72,7 +72,7 @@ public class CommunicationsFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         // setup communications view model
-        communicationsViewModel = new ViewModelProvider(requireActivity()).get(CommunicationsViewModel.class);
+        vm = new ViewModelProvider(requireActivity()).get(CommunicationsViewModel.class);
 
         callActionFab = view.findViewById(R.id.call_action_fab);
         hangupActionFab = view.findViewById(R.id.hangup_action_fab);
@@ -102,7 +102,9 @@ public class CommunicationsFragment extends Fragment {
             String activeContactName = activeContact.getName();
             contactNameView.setText(activeContactName);
             contactNameActiveCallView.setText(activeContactName);
-            communicationsViewModel.setActiveContact(activeContact);
+            vm.setActiveContact(activeContact);
+            vm.watchActiveContact();
+            vm.getIsOutsideOfficeHours().observe(getViewLifecycleOwner(), new ActiveContactOfficeHoursObserver());
 
             boolean externalAccept = args.getBoolean("externalAccept");
             if (externalAccept) {
@@ -166,6 +168,24 @@ public class CommunicationsFragment extends Fragment {
 
     private View.OnClickListener goBack() {
         return view -> requireActivity().onBackPressed();
+    }
+
+    @Override
+    public void onDestroyView() {
+        vm.deregisterListener();
+        super.onDestroyView();
+    }
+
+    private class ActiveContactOfficeHoursObserver implements Observer<Boolean> {
+        @Override
+        public void onChanged(Boolean isOutsideOfficeHours) {
+            Log.i(TAG, "isOutsideOfficeHours: " + isOutsideOfficeHours);
+            if (isOutsideOfficeHours) {
+                callActionFab.setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.ic_call_white_disabled_24));
+            } else {
+                callActionFab.setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.ic_call_white_24dp));
+            }
+        }
     }
 
     //    // TODO: Rename parameter arguments, choose names that match
