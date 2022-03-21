@@ -122,6 +122,7 @@ public class SessionManager extends SharedPreferencesManager {
                             User user = users.get(0);
                             // set user info
                             setCurrentUser(user);
+                            navigateToUserActivity(activity, user.getUserType());
                         }
                     }
                 } else {
@@ -154,19 +155,23 @@ public class SessionManager extends SharedPreferencesManager {
             setCurrentUser(user);
             confirmUserTypeDialog.dismiss();
 
-            // navigate to correct activity
-            switch (userType) {
-                case PARENT:
-                    activity.startActivity(new Intent(activity, ParentActivity.class));
-                    break;
-                case STUDENT:
-                    activity.startActivity(new Intent(activity, StudentActivity.class));
-                    break;
-                case TEACHER:
-                default:
-                    activity.startActivity(new Intent(activity, TeacherActivity.class));
-            }
+            navigateToUserActivity(activity, userType);
         };
+    }
+
+    private void navigateToUserActivity(Activity activity, User.UserType userType) {
+        // navigate to correct activity
+        switch (userType) {
+            case PARENT:
+                activity.startActivity(new Intent(activity, ParentActivity.class));
+                break;
+            case STUDENT:
+                activity.startActivity(new Intent(activity, StudentActivity.class));
+                break;
+            case TEACHER:
+            default:
+                activity.startActivity(new Intent(activity, TeacherActivity.class));
+        }
     }
 
     public AlertDialog chooseUserTypeDialog(Activity activity,
@@ -174,12 +179,9 @@ public class SessionManager extends SharedPreferencesManager {
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(activity);
         alertDialogBuilder.setTitle("Select User Type");
         CharSequence[] choices = {"TEACHER", "PARENT", "STUDENT"};
-        alertDialogBuilder.setSingleChoiceItems(choices, -1, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                String chosenUserType = (String) choices[i];
-                setChosenUserType(chosenUserType);
-            }
+        alertDialogBuilder.setSingleChoiceItems(choices, -1, (dialogInterface, i) -> {
+            String chosenUserType = (String) choices[i];
+            setChosenUserType(chosenUserType);
         });
         alertDialogBuilder.setPositiveButton("Confirm", confirmUserType);
         alertDialogBuilder.setCancelable(false);

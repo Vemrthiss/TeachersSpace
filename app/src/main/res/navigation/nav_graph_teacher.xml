@@ -15,6 +15,10 @@
         <action
             android:id="@+id/navigate_search_action"
             app:destination="@id/search_fragment" />
+        <!-- TODO: remove the below action, for testing only -->
+        <action
+            android:id="@+id/navigate_settings_action"
+            app:destination="@id/settings_fragment" />
     </fragment>
     <fragment
         android:id="@+id/communications_fragment"

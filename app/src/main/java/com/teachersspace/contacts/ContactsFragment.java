@@ -5,6 +5,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 
 import androidx.annotation.NonNull;
@@ -101,12 +102,15 @@ public class ContactsFragment extends Fragment {
         contactsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         contactsAdapter = new ContactsAdapter(contacts, this);
         contactsRecyclerView.setAdapter(contactsAdapter);
+
+        // TODO: remove the below after navbar is ready
+        Button settingsButtonTest = view.findViewById(R.id.settings_test);
+        settingsButtonTest.setOnClickListener(navigateToSettings());
     }
 
     private View.OnFocusChangeListener navigateToSearch() {
         return (view, hasFocus) -> {
             if (hasFocus) {
-                Log.i(TAG, "navigateToSearch");
                 NavDirections directions = new NavDirections() {
                     @NonNull
                     @Override
@@ -121,6 +125,25 @@ public class ContactsFragment extends Fragment {
                 };
                 navigate(directions);
             }
+        };
+    }
+
+    // TODO: remove this, interim method before navbar is ready
+    private View.OnClickListener navigateToSettings() {
+        return view -> {
+            NavDirections directions = new NavDirections() {
+                @Override
+                public int getActionId() {
+                    return R.id.navigate_settings_action;
+                }
+
+                @NonNull
+                @Override
+                public Bundle getArguments() {
+                    return new Bundle();
+                }
+            };
+            navigate(directions);
         };
     }
 

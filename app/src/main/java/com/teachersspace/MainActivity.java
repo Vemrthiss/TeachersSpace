@@ -45,22 +45,22 @@ public class MainActivity extends AppCompatActivity {
         //Initialize the bottom navigation view
         //create bottom navigation view object
         //https://developer.android.com/guide/navigation/navigation-ui#java
-        NavController navController = Navigation.findNavController(this, R.id.nav_fragment);
-        // will appBarConfiguration have a problem because the actionbar is hidden?
-        AppBarConfiguration appBarConfiguration =
-                new AppBarConfiguration.Builder(navController.getGraph()).build();
-        Toolbar bottomNavigationView = findViewById(R.id.bottom_navigation_view);
-        NavigationUI.setupWithNavController(bottomNavigationView, navController, appBarConfiguration);
+//        NavController navController = Navigation.findNavController(this, R.id.nav_fragment);
+//        // will appBarConfiguration have a problem because the actionbar is hidden?
+//        AppBarConfiguration appBarConfiguration =
+//                new AppBarConfiguration.Builder(navController.getGraph()).build();
+//        Toolbar bottomNavigationView = findViewById(R.id.bottom_navigation_view);
+//        NavigationUI.setupWithNavController(bottomNavigationView, navController, appBarConfiguration);
 
-        // redirect users to correct activity based on user type
         User user = this.sessionManager.getCurrentUser();
         if (SessionManager.getFirebaseLoginInfo() == null || user == null) {
             Log.d(TAG, "no login info");
-            // no firebase login, make users login through firebase
-            Intent activateLoginIntent = new Intent(this, FirebaseAuthActivity.class);
-            startActivity(activateLoginIntent);
-            // after login what happens? does it go back to the same activity that calls FirebaseAuthActivity?
-            // suppose that it returns to this activity, does it call the onCreate hook again?
+            Button loginButton = findViewById(R.id.login_button_main);
+            loginButton.setOnClickListener(view -> {
+                // no firebase login, make users login through firebase
+                Intent activateLoginIntent = new Intent(this, FirebaseAuthActivity.class);
+                startActivity(activateLoginIntent);
+            });
         } else {
             navigateToActivity();
         }

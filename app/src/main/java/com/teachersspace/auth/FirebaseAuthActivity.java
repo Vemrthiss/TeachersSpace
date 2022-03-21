@@ -59,6 +59,7 @@ public class FirebaseAuthActivity extends AppCompatActivity {
         Intent signInIntent = AuthUI.getInstance()
                 .createSignInIntentBuilder()
                 .setAvailableProviders(providers)
+                .setTheme(R.style.LoginTheme)
                 .build();
         signInLauncher.launch(signInIntent);
     }
