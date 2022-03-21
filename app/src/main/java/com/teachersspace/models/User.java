@@ -59,6 +59,22 @@ public class User {
         this.contacts = contacts;
     }
 
+    private Date officeStart;
+    public Date getOfficeStart() {
+        return officeStart;
+    }
+    public void setOfficeStart(Date officeStart) {
+        this.officeStart = officeStart;
+    }
+
+    private Date officeEnd;
+    public Date getOfficeEnd() {
+        return officeEnd;
+    }
+    public void setOfficeEnd(Date officeEnd) {
+        this.officeEnd = officeEnd;
+    }
+
     public User(String uid, String name, String email, UserType userType, Map<String, Date> contacts) {
         this(uid, name, email, userType);
         setContacts(contacts);
@@ -87,6 +103,8 @@ public class User {
                 "name='" + name + '\'' +
                 "email='" + email + '\'' +
                 "contacts='" + contacts.toString() + '\'' +
+                "officeStart='" + officeStart + '\'' +
+                "officeEnd='" + officeEnd + '\'' +
                 ", userType=" + userType +
                 '}';
     }

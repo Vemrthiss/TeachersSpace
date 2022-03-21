@@ -63,6 +63,7 @@ public class MessageRepository extends SingleFirebaseCollectionRepository {
     /**
      * updates the FROM and TO users' "contacts" field in firestore
      * with the CURRENT DATETIME
+     * actually, should call methods from UserRepository since it concerns users
      * @param fromUserUid user UID of the user who sent the message
      * @param toUserUid user UID of the user who is to receive the message
      */

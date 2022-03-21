@@ -15,6 +15,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 import com.teachersspace.models.User;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -75,4 +76,28 @@ public class UserRepository extends SingleFirebaseCollectionRepository {
 //    public void addContact() {
 //
 //    }
+
+    public void updateStartOfficeHours(String userUid, Date newStart) {
+        getCollection()
+                .document(userUid)
+                .update("officeStart", newStart)
+                .addOnSuccessListener(unused -> {
+                    Log.d(TAG, "updated teacher start office hours");
+                })
+                .addOnFailureListener(e -> {
+                    Log.w(TAG, "error updating document", e);
+                });
+    }
+
+    public void updateEndOfficeHours(String userUid, Date newEnd) {
+        getCollection()
+                .document(userUid)
+                .update("officeEnd", newEnd)
+                .addOnSuccessListener(unused -> {
+                    Log.d(TAG, "updated teacher end office hours");
+                })
+                .addOnFailureListener(e -> {
+                    Log.w(TAG, "error updating document", e);
+                });
+    }
 }

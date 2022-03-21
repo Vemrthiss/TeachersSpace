@@ -17,10 +17,15 @@
         <item name="android:alertDialogTheme">@style/AlertDialogTheme</item>
         <item name="android:fontFamily">@font/lexend</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:timePickerDialogTheme">@style/TimePickerTheme</item>
     </style>
 
     <style name="AlertDialogTheme" parent="Theme.AppCompat.Light.Dialog.Alert">
         <item name="android:background">@color/blue_200</item>
+    </style>
+
+    <style name="TimePickerTheme" parent="ThemeOverlay.MaterialComponents.TimePicker">
+        <item name="android:textColor">@color/blue_500</item>
     </style>
 
     <style name="LoginTheme" parent="FirebaseUI">
