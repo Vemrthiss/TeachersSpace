@@ -22,7 +22,9 @@ import com.teachersspace.MainActivity;
 import com.teachersspace.R;
 import com.teachersspace.auth.FirebaseAuthActivity;
 import com.teachersspace.auth.SessionManager;
+import com.teachersspace.helpers.TimeFormatter;
 import com.teachersspace.helpers.TimePickerFragment;
+import com.teachersspace.models.User;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -56,8 +58,9 @@ public class SettingsFragment extends Fragment {
             if (endOfficeHours != null) {
                 endCalendar.setTime(endOfficeHours);
             }
-            String startTiming = formatDigits(Integer.toString(startCalendar.get(Calendar.HOUR_OF_DAY))) + ":" + formatDigits(Integer.toString(startCalendar.get(Calendar.MINUTE)));
-            String endTiming = formatDigits(Integer.toString(endCalendar.get(Calendar.HOUR_OF_DAY))) + ":" + formatDigits(Integer.toString(endCalendar.get(Calendar.MINUTE)));
+
+            String startTiming = TimeFormatter.formatTime(startCalendar);
+            String endTiming = TimeFormatter.formatTime(endCalendar);
 
             Activity activity = requireActivity();
             final String startOfficeHoursText = activity.getString(R.string.start_office_hours, startTiming);
@@ -82,14 +85,22 @@ public class SettingsFragment extends Fragment {
 
         Button logoutButton = view.findViewById(R.id.logout_button);
         logoutButton.setOnClickListener(logout());
-        Button setStartOfficeHoursButton = view.findViewById(R.id.set_start_office_hours);
-        setStartOfficeHoursButton.setOnClickListener(showTimePicker(TimePickerFragment.OfficeHourType.START));
-        Button setEndOfficeHoursButton = view.findViewById(R.id.set_end_office_hours);
-        setEndOfficeHoursButton.setOnClickListener(showTimePicker(TimePickerFragment.OfficeHourType.END));
 
-        vm = new ViewModelProvider(requireActivity()).get(SettingsViewModel.class);
-        String userUid = this.sessionManager.getCurrentUser().getUid();
-        vm.getOfficeHours(userUid).observe(getViewLifecycleOwner(), new OfficeHoursObserver(setStartOfficeHoursButton, setEndOfficeHoursButton));
+        User currentUser = this.sessionManager.getCurrentUser();
+
+        if (currentUser.getUserType() == User.UserType.TEACHER) {
+            // if user is teacher, setup office hours settings
+            Button setStartOfficeHoursButton = view.findViewById(R.id.set_start_office_hours);
+            setStartOfficeHoursButton.setVisibility(View.VISIBLE);
+            setStartOfficeHoursButton.setOnClickListener(showTimePicker(TimePickerFragment.OfficeHourType.START));
+            Button setEndOfficeHoursButton = view.findViewById(R.id.set_end_office_hours);
+            setEndOfficeHoursButton.setVisibility(View.VISIBLE);
+            setEndOfficeHoursButton.setOnClickListener(showTimePicker(TimePickerFragment.OfficeHourType.END));
+
+            vm = new ViewModelProvider(requireActivity()).get(SettingsViewModel.class);
+            String userUid = currentUser.getUid();
+            vm.getOfficeHours(userUid).observe(getViewLifecycleOwner(), new OfficeHoursObserver(setStartOfficeHoursButton, setEndOfficeHoursButton));
+        }
     }
 
     private View.OnClickListener logout() {
@@ -110,12 +121,5 @@ public class SettingsFragment extends Fragment {
             DialogFragment timepicker = new TimePickerFragment(pickerType, getContext());
             timepicker.show(getParentFragmentManager(), "timepicker-"+ pickerType);
         };
-    }
-
-    private String formatDigits(String s) {
-        if (s.length() == 1) {
-            return "0" + s;
-        }
-        return s;
     }
 }

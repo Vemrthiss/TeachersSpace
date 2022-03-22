@@ -1,5 +1,6 @@
 package com.teachersspace.communications;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
@@ -22,6 +23,7 @@ import android.widget.TextView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.teachersspace.R;
+import com.teachersspace.helpers.TimeFormatter;
 import com.teachersspace.models.User;
 
 import java.util.Calendar;
@@ -40,6 +42,8 @@ public class CommunicationsFragment extends Fragment {
     private FloatingActionButton muteActionFab;
     private Chronometer chronometer;
     private TextView contactNameView;
+    private TextView contactHoursView;
+    private TextView contactTypeView;
     private TextView contactNameActiveCallView;
     private ConstraintLayout inactiveCallLayout;
     private ConstraintLayout activeCallLayout;
@@ -80,6 +84,8 @@ public class CommunicationsFragment extends Fragment {
         muteActionFab = view.findViewById(R.id.mute_action_fab);
         chronometer = view.findViewById(R.id.chronometer);
         contactNameView = view.findViewById(R.id.communications_contact_name);
+        contactHoursView = view.findViewById(R.id.communications_contact_hours);
+        contactTypeView = view.findViewById(R.id.communications_contact_type);
         contactNameActiveCallView = view.findViewById(R.id.communications_contact_name_active_call);
         inactiveCallLayout = view.findViewById(R.id.communications_no_call_container);
         activeCallLayout = view.findViewById(R.id.communications_with_call_container);
@@ -101,10 +107,12 @@ public class CommunicationsFragment extends Fragment {
             User activeContact = User.deserialise(args.getString("contact"));
             String activeContactName = activeContact.getName();
             contactNameView.setText(activeContactName);
-            contactNameActiveCallView.setText(activeContactName);
+            contactTypeView.setText(activeContact.getUserType().toString());
+            contactNameActiveCallView.setText(activeContactName); // for the active call UI
             vm.setActiveContact(activeContact);
             vm.watchActiveContact();
             vm.getIsOutsideOfficeHours().observe(getViewLifecycleOwner(), new ActiveContactOfficeHoursObserver());
+            vm.getActiveContact().observe(getViewLifecycleOwner(), new ActiveContactObserver());
 
             boolean externalAccept = args.getBoolean("externalAccept");
             if (externalAccept) {
@@ -179,7 +187,7 @@ public class CommunicationsFragment extends Fragment {
     private class ActiveContactOfficeHoursObserver implements Observer<Boolean> {
         @Override
         public void onChanged(Boolean isOutsideOfficeHours) {
-            Log.i(TAG, "isOutsideOfficeHours: " + isOutsideOfficeHours);
+            // set icon
             if (isOutsideOfficeHours) {
                 callActionFab.setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.ic_call_white_disabled_24));
             } else {
@@ -188,51 +196,30 @@ public class CommunicationsFragment extends Fragment {
         }
     }
 
-    //    // TODO: Rename parameter arguments, choose names that match
-//    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-//    private static final String ARG_PARAM1 = "param1";
-//    private static final String ARG_PARAM2 = "param2";
-//
-//    // TODO: Rename and change types of parameters
-//    private String mParam1;
-//    private String mParam2;
-//
-//    public CommunicationsFragment() {
-//        // Required empty public constructor
-//    }
-//
-//    // twilio access token
-//    private String getStoredTwilioToken() {
-//        if (tokenManager == null) {
-//            tokenManager = new TwilioTokenManager(getContext(), SessionManager.getUserUid());
-//        }
-//        return tokenManager.getTwilioAccessToken();
-//    }
-//
-//    /**
-//     * Use this factory method to create a new instance of
-//     * this fragment using the provided parameters.
-//     *
-//     * @param param1 Parameter 1.
-//     * @param param2 Parameter 2.
-//     * @return A new instance of fragment CommunicationsFragment.
-//     */
-//    // TODO: Rename and change types and number of parameters
-//    public static CommunicationsFragment newInstance(String param1, String param2) {
-//        CommunicationsFragment fragment = new CommunicationsFragment();
-//        Bundle args = new Bundle();
-//        args.putString(ARG_PARAM1, param1);
-//        args.putString(ARG_PARAM2, param2);
-//        fragment.setArguments(args);
-//        return fragment;
-//    }
-//
-//    @Override
-//    public void onCreate(Bundle savedInstanceState) {
-//        super.onCreate(savedInstanceState);
-//        if (getArguments() != null) {
-//            mParam1 = getArguments().getString(ARG_PARAM1);
-//            mParam2 = getArguments().getString(ARG_PARAM2);
-//        }
-//    }
+    private class ActiveContactObserver implements Observer<User> {
+        @Override
+        public void onChanged(User activeContact) {
+            if (activeContact.getUserType() == User.UserType.TEACHER) {
+                // set office hours text
+                Date startOfficeHours = activeContact.getOfficeStart();
+                Date endOfficeHours = activeContact.getOfficeEnd();
+                Calendar startCalendar = Calendar.getInstance();
+                Calendar endCalendar = Calendar.getInstance();
+                if (startOfficeHours != null) {
+                    startCalendar.setTime(startOfficeHours);
+                }
+                if (endOfficeHours != null) {
+                    endCalendar.setTime(endOfficeHours);
+                }
+
+                String startTiming = TimeFormatter.formatTime(startCalendar);
+                String endTiming = TimeFormatter.formatTime(endCalendar);
+
+                Activity activity = requireActivity();
+                final String officeHoursText = activity.getString(R.string.contact_office_hours, startTiming, endTiming);
+                contactHoursView.setVisibility(View.VISIBLE);
+                contactHoursView.setText(officeHoursText);
+            }
+        }
+    }
 }
