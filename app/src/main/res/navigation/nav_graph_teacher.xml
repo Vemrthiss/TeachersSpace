@@ -5,6 +5,13 @@
     android:id="@+id/nav_graph_teacher"
     app:startDestination="@id/contactsFragmentMain">
 
+    <action
+        android:id="@+id/navigate_contacts_action_global"
+        app:destination="@id/contactsFragmentMain" />
+    <action
+        android:id="@+id/navigate_settings_action_global"
+        app:destination="@id/settings_fragment" />
+
     <fragment
         android:id="@+id/contactsFragmentMain"
         android:name="com.teachersspace.contacts.ContactsFragment"
@@ -15,16 +22,16 @@
         <action
             android:id="@+id/navigate_search_action"
             app:destination="@id/search_fragment" />
-        <!-- TODO: remove the below action, for testing only -->
-        <action
-            android:id="@+id/navigate_settings_action"
-            app:destination="@id/settings_fragment" />
     </fragment>
+
     <fragment
         android:id="@+id/communications_fragment"
         android:name="com.teachersspace.communications.CommunicationsFragment"
         android:label="fragment_communications"
         tools:layout="@layout/fragment_communications">
+        <action
+            android:id="@+id/navigate_back_contacts_action"
+            app:destination="@id/contactsFragmentMain" />
         <argument
             android:name="contact"
             app:argType="string"/>

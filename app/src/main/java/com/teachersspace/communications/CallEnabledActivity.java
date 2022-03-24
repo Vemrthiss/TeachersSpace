@@ -596,7 +596,6 @@ public abstract class CallEnabledActivity extends AppCompatActivity implements C
         }
 
         getCommunicationsFragment();
-        Log.i(TAG, "i reached here" + String.valueOf(communicationsFragment == null));
         communicationsFragment.setCallUI();
         if (alertDialog != null && alertDialog.isShowing()) {
             alertDialog.dismiss();
