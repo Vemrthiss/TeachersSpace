@@ -13,17 +13,15 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.TeachersSpace">
-
         <service
-            android:enabled="true"
             android:name=".communications.IncomingCallNotificationService"
+            android:enabled="true"
             android:exported="false">
             <intent-filter>
                 <action android:name="ACTION_ACCEPT" />
                 <action android:name="ACTION_REJECT" />
             </intent-filter>
         </service>
-
         <service
             android:name=".fcm.VoiceFirebaseMessagingService"
             android:enabled="true"
@@ -35,26 +33,26 @@
 
         <activity
             android:name=".student.StudentActivity"
-            android:exported="false"
             android:configChanges="orientation"
-            android:screenOrientation="portrait"/>
+            android:exported="false"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".parent.ParentActivity"
-            android:exported="false"
             android:configChanges="orientation"
-            android:screenOrientation="portrait"/>
+            android:exported="false"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".teacher.TeacherActivity"
-            android:exported="false"
             android:configChanges="orientation"
-            android:screenOrientation="portrait"/>
+            android:exported="false"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".auth.FirebaseAuthActivity"
-            android:exported="false"/>
+            android:exported="false" />
         <activity
             android:name=".MainActivity"
-            android:exported="true"
             android:configChanges="orientation"
+            android:exported="true"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

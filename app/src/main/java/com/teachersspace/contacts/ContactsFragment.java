@@ -123,6 +123,7 @@ public class ContactsFragment extends Fragment {
                         return R.id.navigate_search_action;
                     }
                 };
+                Log.i(TAG, "nav from contacts to search");
                 navigate(directions);
             }
         };
@@ -143,6 +144,7 @@ public class ContactsFragment extends Fragment {
                     return new Bundle();
                 }
             };
+            Log.i(TAG, "nav from contacts to settings");
             navigate(directions);
         };
     }

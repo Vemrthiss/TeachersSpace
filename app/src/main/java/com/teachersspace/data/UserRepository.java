@@ -16,6 +16,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 import com.teachersspace.models.User;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.function.Consumer;
@@ -26,6 +27,19 @@ public class UserRepository extends SingleFirebaseCollectionRepository {
     @Override
     protected String getCollectionPath() {
         return "users";
+    }
+
+    public void getAllUsers(OnCompleteListener<QuerySnapshot> onCompleteListener){
+        getCollection()
+                .get()
+                .addOnCompleteListener(onCompleteListener);
+    }
+
+    public void getOtherUsers(String uid, OnCompleteListener<QuerySnapshot> onCompleteListener) {
+        getCollection()
+                .whereNotEqualTo("uid", uid)
+                .get()
+                .addOnCompleteListener(onCompleteListener);
     }
 
     public void getUserByUid(String uid, OnCompleteListener<QuerySnapshot> onCompleteListener) {
