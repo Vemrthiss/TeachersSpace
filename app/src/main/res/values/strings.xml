@@ -17,6 +17,7 @@
     <string name="confirm_active_contact">Proceed with calling %1$s?</string>
     <string name="settings_header">Settings</string>
     <string name="logout">Logout</string>
+    <string name="edit_display_name">Display Name: %1$s</string>
     <string name="contact_office_hours">Office hours: %1$s - %2$s</string>
     <string name="start_office_hours">Office hours (start): %1$s</string>
     <string name="end_office_hours">Office hours (end): %1$s</string>
@@ -35,4 +36,5 @@
     <string name="attachment_summary_on">Automatically download attachments for incoming emails
     </string>
     <string name="attachment_summary_off">Only download attachments when manually requested</string>
+    <string name="hint_display_name">New Display Name</string>
 </resources>
