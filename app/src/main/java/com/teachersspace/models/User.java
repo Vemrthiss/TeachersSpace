@@ -75,9 +75,18 @@ public class User {
         this.officeEnd = officeEnd;
     }
 
-    public User(String uid, String name, String email, UserType userType, Map<String, Date> contacts) {
+    private ArrayList<TimeSlot> timeSlots;
+    public ArrayList<TimeSlot> getTimeSlots() {
+        return timeSlots;
+    }
+    public void setTimeSlots(ArrayList<TimeSlot> timeSlots) {
+        this.timeSlots = timeSlots;
+    }
+
+    public User(String uid, String name, String email, UserType userType, Map<String, Date> contacts, ArrayList<TimeSlot> timeSlots) {
         this(uid, name, email, userType);
         setContacts(contacts);
+        setTimeSlots(timeSlots);
     }
     public User(String uid, String name, String email, UserType userType) {
         setUid(uid);
