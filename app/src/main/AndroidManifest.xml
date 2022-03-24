@@ -13,15 +13,17 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.TeachersSpace">
+
         <service
-            android:name=".communications.IncomingCallNotificationService"
             android:enabled="true"
+            android:name=".communications.IncomingCallNotificationService"
             android:exported="false">
             <intent-filter>
                 <action android:name="ACTION_ACCEPT" />
                 <action android:name="ACTION_REJECT" />
             </intent-filter>
         </service>
+
         <service
             android:name=".fcm.VoiceFirebaseMessagingService"
             android:enabled="true"
@@ -33,26 +35,27 @@
 
         <activity
             android:name=".student.StudentActivity"
-            android:configChanges="orientation"
             android:exported="false"
-            android:screenOrientation="portrait" />
+            android:configChanges="orientation"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".parent.ParentActivity"
-            android:configChanges="orientation"
             android:exported="false"
-            android:screenOrientation="portrait" />
+            android:configChanges="orientation"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".teacher.TeacherActivity"
-            android:configChanges="orientation"
             android:exported="false"
-            android:screenOrientation="portrait" />
+            android:configChanges="orientation"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".auth.FirebaseAuthActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".MainActivity"
-            android:configChanges="orientation"
             android:exported="true"
+            android:configChanges="orientation"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

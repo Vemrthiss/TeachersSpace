@@ -1,16 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph_parent"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/nav_graph_teacher"
     app:startDestination="@id/contactsFragmentMain">
 
     <action
         android:id="@+id/navigate_contacts_action_global"
         app:destination="@id/contactsFragmentMain" />
-    <action
-        android:id="@+id/navigate_schedule_action_global"
-        app:destination="@id/schedule_fragment" />
     <action
         android:id="@+id/navigate_settings_action_global"
         app:destination="@id/settings_fragment" />
@@ -28,13 +25,6 @@
     </fragment>
 
     <fragment
-        android:id="@+id/schedule_fragment"
-        android:name="com.teachersspace.schedule.ScheduleFragment"
-        android:label="ContactsFragment">
-
-    </fragment>
-
-    <fragment
         android:id="@+id/communications_fragment"
         android:name="com.teachersspace.communications.CommunicationsFragment"
         android:label="fragment_communications"
@@ -49,10 +39,12 @@
             android:name="externalAccept"
             app:argType="boolean"/>
     </fragment>
+
     <fragment
         android:id="@+id/search_fragment"
         android:name="com.teachersspace.search.SearchFragment"
         android:label="SearchFragment"/>
+
     <fragment
         android:id="@+id/settings_fragment"
         android:name="com.teachersspace.settings.SettingsFragment"

@@ -13,7 +13,7 @@ import com.teachersspace.R;
 import com.teachersspace.communications.CallEnabledActivity;
 
 public class TeacherActivity extends CallEnabledActivity implements BottomNavigationView.OnItemSelectedListener {
-    private final String TAG = "TeacherActivity";
+    private static final String TAG = "TeacherActivity";
 
     BottomNavigationView bottomNavigationView;
 
@@ -28,26 +28,27 @@ public class TeacherActivity extends CallEnabledActivity implements BottomNaviga
         setContentView(R.layout.activity_teacher);
 
         bottomNavigationView = findViewById(R.id.bottomNavigationViewTeacher);
-
         bottomNavigationView.setOnItemSelectedListener(this);
         bottomNavigationView.setSelectedItemId(R.id.contactsFragmentMain);
-
     }
 
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         NavController navController = Navigation.findNavController(this, getNavFragmentContainer());
-        switch (item.getItemId()) {
-            case R.id.action_setting:
-                navController.navigate(R.id.navigate_settings_action_global);
-                return true;
-
-            case R.id.action_contact:
-                navController.navigate(R.id.navigate_contacts_action_global);
-                return true;
+        int navItemId = item.getItemId();
+        if (navItemId == R.id.action_setting) {
+            navController.navigate(R.id.navigate_settings_action_global);
+            return true;
+        } else if (navItemId == R.id.action_schedule) {
+            navController.navigate(R.id.navigate_schedule_action_global);
+            return true;
+        } else if (navItemId == R.id.action_contact) {
+            navController.navigate(R.id.navigate_contacts_action_global);
+            return true;
+        } else {
+            return false;
         }
-        return false;
     }
 //
 }

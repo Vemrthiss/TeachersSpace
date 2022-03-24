@@ -6,12 +6,6 @@
         android:icon="@drawable/ic_baseline_list_alt_24"
         />
 
-    <item android:title="@string/schedule_header"
-        android:id="@+id/action_schedule"
-        android:checked="false"
-        android:icon="@drawable/ic_calendar_24"
-        />
-
     <item android:title="@string/settings_header"
         android:id="@+id/action_setting"
         android:checked="false"

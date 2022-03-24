@@ -22,6 +22,7 @@
     <string name="start_office_hours">Office hours (start): %1$s</string>
     <string name="end_office_hours">Office hours (end): %1$s</string>
     <string name="outside_office_hours_message">Please call again later! It is outside of this teacher\'s office hours.</string>
+    <string name="schedule_header">Schedule</string>
     <!-- Preference Titles -->
     <string name="messages_header">Messages</string>
     <string name="sync_header">Sync</string>
