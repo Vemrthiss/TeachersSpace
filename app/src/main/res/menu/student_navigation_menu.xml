@@ -1,14 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:title="@string/contacts_header"
+    <item android:title="@string/schedule_header"
         android:id="@+id/action_contact"
         android:checked="true"
-        android:icon="@drawable/ic_baseline_list_alt_24"
-        />
-
-    <item android:title="@string/schedule_header"
-        android:id="@+id/action_schedule"
-        android:checked="false"
         android:icon="@drawable/ic_calendar_24"
         />
 

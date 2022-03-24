@@ -2,15 +2,12 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/nav_graph_teacher"
+    android:id="@+id/nav_graph_student"
     app:startDestination="@id/contactsFragmentMain">
 
     <action
         android:id="@+id/navigate_contacts_action_global"
         app:destination="@id/contactsFragmentMain" />
-    <action
-        android:id="@+id/navigate_schedule_action_global"
-        app:destination="@id/schedule_fragment" />
     <action
         android:id="@+id/navigate_settings_action_global"
         app:destination="@id/settings_fragment" />
@@ -20,8 +17,8 @@
         android:name="com.teachersspace.contacts.ContactsFragment"
         android:label="ContactsFragment">
         <action
-            android:id="@+id/navigate_single_contact_action"
-            app:destination="@id/communications_fragment" />
+            android:id="@+id/navigate_single_contact_schedule_action"
+            app:destination="@id/schedule_fragment" />
         <action
             android:id="@+id/navigate_search_action"
             app:destination="@id/search_fragment" />
@@ -34,21 +31,6 @@
 
     </fragment>
 
-    <fragment
-        android:id="@+id/communications_fragment"
-        android:name="com.teachersspace.communications.CommunicationsFragment"
-        android:label="fragment_communications"
-        tools:layout="@layout/fragment_communications">
-        <action
-            android:id="@+id/navigate_back_contacts_action"
-            app:destination="@id/contactsFragmentMain" />
-        <argument
-            android:name="contact"
-            app:argType="string"/>
-        <argument
-            android:name="externalAccept"
-            app:argType="boolean"/>
-    </fragment>
     <fragment
         android:id="@+id/search_fragment"
         android:name="com.teachersspace.search.SearchFragment"
