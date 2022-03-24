@@ -12,6 +12,8 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavDirections;
+import androidx.navigation.fragment.NavHostFragment;
 
 import android.os.SystemClock;
 import android.util.Log;
@@ -21,8 +23,10 @@ import android.view.ViewGroup;
 import android.widget.Chronometer;
 import android.widget.TextView;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.teachersspace.R;
+import com.teachersspace.contacts.ContactsFragment;
 import com.teachersspace.helpers.TimeFormatter;
 import com.teachersspace.models.User;
 
@@ -48,6 +52,8 @@ public class CommunicationsFragment extends Fragment {
     private ConstraintLayout inactiveCallLayout;
     private ConstraintLayout activeCallLayout;
     private FloatingActionButton backActionFab;
+
+    private BottomNavigationView navbar;
 
     public interface CommunicationsFragmentProps {
         View.OnClickListener callActionFabClickListener();
@@ -134,6 +140,7 @@ public class CommunicationsFragment extends Fragment {
         chronometer.setVisibility(View.VISIBLE);
         chronometer.setBase(SystemClock.elapsedRealtime());
         chronometer.start();
+        toggleNavbar(false);
     }
 
     /*
@@ -153,6 +160,7 @@ public class CommunicationsFragment extends Fragment {
         hangupActionFab.hide();
         chronometer.setVisibility(View.INVISIBLE);
         chronometer.stop();
+        toggleNavbar(true);
     }
 
     public void applyFabState(String buttonWhich, boolean enabled) {
@@ -175,7 +183,21 @@ public class CommunicationsFragment extends Fragment {
     }
 
     private View.OnClickListener goBack() {
-        return view -> requireActivity().onBackPressed();
+        return view -> {
+            NavDirections directions = new NavDirections() {
+                @NonNull
+                @Override
+                public Bundle getArguments() {
+                    return new Bundle();
+                }
+
+                @Override
+                public int getActionId() {
+                    return R.id.navigate_back_contacts_action;
+                }
+            };
+            NavHostFragment.findNavController(CommunicationsFragment.this).navigate(directions);
+        };
     }
 
     @Override
@@ -220,6 +242,19 @@ public class CommunicationsFragment extends Fragment {
                 contactHoursView.setVisibility(View.VISIBLE);
                 contactHoursView.setText(officeHoursText);
             }
+        }
+    }
+
+    private void toggleNavbar(boolean toShow) {
+        navbar = requireActivity().findViewById(R.id.bottomNavigationViewTeacher);
+        if (navbar == null) {
+            navbar = requireActivity().findViewById(R.id.bottomNavigationViewParent);
+        }
+
+        if (toShow) {
+            navbar.setVisibility(View.VISIBLE);
+        } else {
+            navbar.setVisibility(View.GONE);
         }
     }
 }
