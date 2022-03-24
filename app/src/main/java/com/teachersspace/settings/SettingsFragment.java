@@ -1,7 +1,9 @@
 package com.teachersspace.settings;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -9,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -34,39 +37,51 @@ public class SettingsFragment extends Fragment {
     private static final String TAG = "SettingsFragment";
     private SessionManager sessionManager;
     private Context context;
+    private AlertDialog displayNameDialog;
 
     private SettingsViewModel vm;
 
-    private class OfficeHoursObserver implements Observer<Map<TimePickerFragment.OfficeHourType, Date>> {
+    private class CurrentUserObserver implements Observer<User> {
         private Button setStartOfficeHoursButton;
         private Button setEndOfficeHoursButton;
+        private Button setDisplayNameButton;
 
-        public OfficeHoursObserver(Button setStartOfficeHoursButton, Button setEndOfficeHoursButton) {
+        public CurrentUserObserver(Button setDisplayNameButton, Button setStartOfficeHoursButton, Button setEndOfficeHoursButton) {
+            this.setDisplayNameButton = setDisplayNameButton;
             this.setStartOfficeHoursButton = setStartOfficeHoursButton;
             this.setEndOfficeHoursButton = setEndOfficeHoursButton;
         }
 
+        public CurrentUserObserver(Button setDisplayNameButton) {
+            this.setDisplayNameButton = setDisplayNameButton;
+        }
+
         @Override
-        public void onChanged(Map<TimePickerFragment.OfficeHourType, Date> newOfficeHours) {
-            Date startOfficeHours = newOfficeHours.get(TimePickerFragment.OfficeHourType.START);
-            Date endOfficeHours = newOfficeHours.get(TimePickerFragment.OfficeHourType.END);
-            Calendar startCalendar = Calendar.getInstance();
-            Calendar endCalendar = Calendar.getInstance();
-            if (startOfficeHours != null) {
-                startCalendar.setTime(startOfficeHours);
-            }
-            if (endOfficeHours != null) {
-                endCalendar.setTime(endOfficeHours);
-            }
-
-            String startTiming = TimeFormatter.formatTime(startCalendar);
-            String endTiming = TimeFormatter.formatTime(endCalendar);
-
+        public void onChanged(User user) {
             Activity activity = requireActivity();
-            final String startOfficeHoursText = activity.getString(R.string.start_office_hours, startTiming);
-            final String endOfficeHoursText = activity.getString(R.string.end_office_hours, endTiming);
-            this.setStartOfficeHoursButton.setText(startOfficeHoursText);
-            this.setEndOfficeHoursButton.setText(endOfficeHoursText);
+            final String displayNameButtonText = activity.getString(R.string.edit_display_name, user.getName());
+            this.setDisplayNameButton.setText(displayNameButtonText);
+
+            if (user.getUserType() == User.UserType.TEACHER) {
+                Date startOfficeHours = user.getOfficeStart();
+                Date endOfficeHours = user.getOfficeEnd();
+                Calendar startCalendar = Calendar.getInstance();
+                Calendar endCalendar = Calendar.getInstance();
+                if (startOfficeHours != null) {
+                    startCalendar.setTime(startOfficeHours);
+                }
+                if (endOfficeHours != null) {
+                    endCalendar.setTime(endOfficeHours);
+                }
+
+                String startTiming = TimeFormatter.formatTime(startCalendar);
+                String endTiming = TimeFormatter.formatTime(endCalendar);
+
+                final String startOfficeHoursText = activity.getString(R.string.start_office_hours, startTiming);
+                final String endOfficeHoursText = activity.getString(R.string.end_office_hours, endTiming);
+                this.setStartOfficeHoursButton.setText(startOfficeHoursText);
+                this.setEndOfficeHoursButton.setText(endOfficeHoursText);
+            }
         }
     }
 
@@ -86,8 +101,12 @@ public class SettingsFragment extends Fragment {
         Button logoutButton = view.findViewById(R.id.logout_button);
         logoutButton.setOnClickListener(logout());
 
-        User currentUser = this.sessionManager.getCurrentUser();
+        Button setDisplayNameButton = view.findViewById(R.id.set_display_name);
+        setDisplayNameButton.setOnClickListener(showEditDisplayNameDialog());
 
+        User currentUser = this.sessionManager.getCurrentUser();
+        String userUid = currentUser.getUid();
+        vm = new ViewModelProvider(requireActivity()).get(SettingsViewModel.class);
         if (currentUser.getUserType() == User.UserType.TEACHER) {
             // if user is teacher, setup office hours settings
             Button setStartOfficeHoursButton = view.findViewById(R.id.set_start_office_hours);
@@ -97,9 +116,13 @@ public class SettingsFragment extends Fragment {
             setEndOfficeHoursButton.setVisibility(View.VISIBLE);
             setEndOfficeHoursButton.setOnClickListener(showTimePicker(TimePickerFragment.OfficeHourType.END));
 
-            vm = new ViewModelProvider(requireActivity()).get(SettingsViewModel.class);
-            String userUid = currentUser.getUid();
-            vm.getOfficeHours(userUid).observe(getViewLifecycleOwner(), new OfficeHoursObserver(setStartOfficeHoursButton, setEndOfficeHoursButton));
+            vm.getCurrentUser(userUid)
+                    .observe(
+                            getViewLifecycleOwner(),
+                            new CurrentUserObserver(setDisplayNameButton, setStartOfficeHoursButton, setEndOfficeHoursButton)
+                    );
+        } else {
+            vm.getCurrentUser(userUid).observe(getViewLifecycleOwner(), new CurrentUserObserver(setDisplayNameButton));
         }
     }
 
@@ -121,5 +144,42 @@ public class SettingsFragment extends Fragment {
             DialogFragment timepicker = new TimePickerFragment(pickerType, getContext());
             timepicker.show(getParentFragmentManager(), "timepicker-"+ pickerType);
         };
+    }
+
+    private View.OnClickListener showEditDisplayNameDialog() {
+        return view -> {
+            User currentUser = this.sessionManager.getCurrentUser();
+            DialogInterface.OnClickListener editDisplayName = (dialogInterface, i) -> {
+                EditText displayNameEditText = ((AlertDialog) dialogInterface).findViewById(R.id.edit_display_name);
+                String newDisplayName = displayNameEditText.getText().toString();
+                vm.updateDisplayName(currentUser.getUid(), newDisplayName);
+                displayNameDialog.dismiss();
+            };
+            DialogInterface.OnClickListener dismissDialog = (dialogInterface, i) -> {
+                if (displayNameDialog != null && displayNameDialog.isShowing()) {
+                    displayNameDialog.dismiss();
+                }
+            };
+            displayNameDialog = createDisplayNameEditDialog(editDisplayName, dismissDialog, getActivity());
+            displayNameDialog.show();
+        };
+    }
+
+    private static AlertDialog createDisplayNameEditDialog(final DialogInterface.OnClickListener submitDisplayNameChange, final DialogInterface.OnClickListener cancelListener ,Activity activity) {
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(activity);
+        alertDialogBuilder.setTitle("Edit Display Name");
+        alertDialogBuilder.setPositiveButton("Edit", submitDisplayNameChange);
+        alertDialogBuilder.setNegativeButton("Cancel", cancelListener);
+        alertDialogBuilder.setCancelable(false);
+
+        LayoutInflater li = LayoutInflater.from(activity);
+        View dialogView = li.inflate(
+                R.layout.dialog_edit_name,
+                activity.findViewById(android.R.id.content),
+                false);
+
+        alertDialogBuilder.setView(dialogView);
+
+        return alertDialogBuilder.create();
     }
 }

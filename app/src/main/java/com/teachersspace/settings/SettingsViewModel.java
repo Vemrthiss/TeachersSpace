@@ -20,16 +20,15 @@ public class SettingsViewModel extends ViewModel {
     private static final String TAG = "SettingsViewModel";
     private final UserRepository userRepository = new UserRepository();
 
-    private MutableLiveData<Map<TimePickerFragment.OfficeHourType, Date>> officeHours;
-    public LiveData<Map<TimePickerFragment.OfficeHourType, Date>> getOfficeHours(String uid) {
-        if (officeHours == null) {
-            officeHours = new MutableLiveData<>();
-            loadOfficeHours(uid);
+    private MutableLiveData<User> currentUser;
+    public LiveData<User> getCurrentUser(String uid) {
+        if (currentUser == null) {
+            currentUser = new MutableLiveData<>();
+            watchCurrentUser(uid);
         }
-        return officeHours;
+        return currentUser;
     }
-
-    private void loadOfficeHours(String uid) {
+    public void watchCurrentUser(String uid) {
         EventListener<DocumentSnapshot> handler = (snapshot, error) -> {
             if (error != null) {
                 Log.w(TAG, "Listen failed.", error);
@@ -39,15 +38,16 @@ public class SettingsViewModel extends ViewModel {
             if (snapshot != null && snapshot.exists()) {
                 User updatedUser = snapshot.toObject(User.class);
                 if (updatedUser != null) {
-                    Map<TimePickerFragment.OfficeHourType, Date> newOfficeHours = new HashMap<>();
-                    newOfficeHours.put(TimePickerFragment.OfficeHourType.START, updatedUser.getOfficeStart());
-                    newOfficeHours.put(TimePickerFragment.OfficeHourType.END, updatedUser.getOfficeEnd());
-                    officeHours.setValue(newOfficeHours);
+                    currentUser.setValue(updatedUser);
                 }
             } else {
                 Log.d(TAG, "data null");
             }
         };
         userRepository.watchSingleUser(uid, handler);
+    }
+
+    public void updateDisplayName(String uid, String newName) {
+        userRepository.updateDisplayName(uid, newName);
     }
 }

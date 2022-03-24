@@ -36,17 +36,29 @@
     </LinearLayout>
 
     <Button
-        android:id="@+id/set_start_office_hours"
-        android:visibility="invisible"
+        android:id="@+id/set_display_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="32dp"
         android:layout_marginEnd="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/settings_heading_container"
+        android:text="@string/edit_display_name"/>
+
+    <Button
+        android:id="@+id/set_start_office_hours"
+        android:visibility="invisible"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
         android:text="@string/start_office_hours"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/settings_heading_container" />
+        app:layout_constraintTop_toBottomOf="@+id/set_display_name" />
 
     <Button
         android:id="@+id/set_end_office_hours"
@@ -54,7 +66,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="16dp"
         android:text="@string/end_office_hours"
         app:layout_constraintEnd_toEndOf="parent"
