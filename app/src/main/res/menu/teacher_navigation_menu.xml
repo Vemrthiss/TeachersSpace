@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:title="@string/contacts_header"
+        android:id="@+id/action_contact"
+        android:checked="true"
+        android:icon="@drawable/ic_baseline_list_alt_24"
+        />
+
+    <item android:title="@string/settings_header"
+        android:id="@+id/action_setting"
+        android:checked="false"
+        android:icon="@drawable/ic_baseline_settings_24"
+        />
+</menu>
