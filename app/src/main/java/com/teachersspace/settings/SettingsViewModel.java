@@ -38,6 +38,7 @@ public class SettingsViewModel extends ViewModel {
             if (snapshot != null && snapshot.exists()) {
                 User updatedUser = snapshot.toObject(User.class);
                 if (updatedUser != null) {
+                    Log.i(TAG, "user: " + updatedUser.getTimeSlots());
                     currentUser.setValue(updatedUser);
                 }
             } else {
