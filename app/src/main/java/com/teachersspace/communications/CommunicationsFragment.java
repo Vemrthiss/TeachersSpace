@@ -25,18 +25,27 @@ import android.widget.TextView;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.teachersspace.R;
-import com.teachersspace.contacts.ContactsFragment;
+import com.teachersspace.auth.SessionManager;
 import com.teachersspace.helpers.TimeFormatter;
+import com.teachersspace.models.Message;
 import com.teachersspace.models.User;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
+
+import com.teachersspace.data.MessageRepository;
 
 
 public class CommunicationsFragment extends Fragment {
     private static final String TAG = "CommunicationsFragment";
+
+    private MessageRepository messageRepository;
 
     private CommunicationsViewModel vm;
 
@@ -107,6 +116,9 @@ public class CommunicationsFragment extends Fragment {
         // setup the UI
         resetUI();
 
+        // Get current user
+        User user = new SessionManager(getContext()).getCurrentUser();
+
         // get contact uid
         Bundle args = getArguments();
         if (args != null) {
@@ -120,10 +132,37 @@ public class CommunicationsFragment extends Fragment {
             vm.getIsOutsideOfficeHours().observe(getViewLifecycleOwner(), new ActiveContactOfficeHoursObserver());
             vm.getActiveContact().observe(getViewLifecycleOwner(), new ActiveContactObserver());
 
+            // Initialise MessageRepository instance
+            messageRepository = new MessageRepository();
+            if (user.getUserType() == User.UserType.TEACHER) {
+                messageRepository.setChatUID(user.getUid() + "-" + activeContact.getUid());
+            }
+            else{
+                messageRepository.setChatUID(activeContact.getUid() + "-" + user.getUid());
+            }
+
+            messageRepository.subscribeToMessageUpdates(new EventListener<QuerySnapshot>() {
+                @Override
+                public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
+                    ArrayList<Message> messages = new ArrayList<Message>();
+                    for (DocumentSnapshot doc : value) {
+                        messages.add(doc.toObject(Message.class));
+                    }
+                    LogMessages(messages);
+                }
+            });
+
             boolean externalAccept = args.getBoolean("externalAccept");
             if (externalAccept) {
                 setCallUI();
             }
+        }
+    }
+
+    // For testing subscriber function
+    public void LogMessages(ArrayList<Message> messages){
+        for(Message message : messages){
+            Log.d(TAG, message.getBody());
         }
     }
 
