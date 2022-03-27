@@ -3,13 +3,11 @@ package com.teachersspace.search;
 import android.content.Context;
 import android.os.Bundle;
 import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
 import android.widget.EditText;
 
 import androidx.annotation.NonNull;
@@ -24,9 +22,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.teachersspace.R;
 import com.teachersspace.auth.SessionManager;
-import com.teachersspace.contacts.ContactsAdapter;
-import com.teachersspace.contacts.ContactsFragment;
-import com.teachersspace.contacts.ContactsViewModel;
 import com.teachersspace.models.User;
 
 import java.util.ArrayList;
@@ -39,7 +34,7 @@ public class SearchFragment extends Fragment {
 
     private SearchViewModel vm;
     private SearchAdapter searchAdapter;
-    private List<User> contacts = new ArrayList<>();
+    private List<User> users = new ArrayList<>(); // list of users to show in RecyclerView
 
     public SearchFragment.SearchIndividualListener contactsIndividualListenerFactory(int position) {
         return new SearchFragment.SearchIndividualListener(position);
@@ -53,12 +48,12 @@ public class SearchFragment extends Fragment {
 
         @Override
         public void onClick(View view) {
-            User selectedUser = contacts.get(itemPosition);
+            User selectedUser = users.get(itemPosition);
             Log.i(TAG, "testing: " + itemPosition + " " + selectedUser.getUid());
             NavDirections directions = new NavDirections() {
                 @Override
                 public int getActionId() {
-                    return R.id.navigate_single_contact_action;
+                    return R.id.navigate_single_result_action;
                 }
 
                 @NonNull
@@ -75,13 +70,15 @@ public class SearchFragment extends Fragment {
 
     private class SearchObserver implements Observer<List<User>> {
         @Override
-        public void onChanged(List<User> updatedContacts) {
+        public void onChanged(List<User> updatedResults) {
             // update UI by updating adapter here when user contacts changes
             // (e.g. new sorting order due to change in activity etc.)
-            Log.d(TAG, "search list updated");
-            contacts = updatedContacts;
-            Log.d(TAG, contacts.toString());
-            searchAdapter.updateLocalData(contacts);
+            Log.d(TAG, "search list updated with contacts");
+            users = updatedResults;
+            Log.d(TAG, users.toString());
+            searchAdapter.updateLocalData(users);
+            Log.d(TAG, "adapter searchList: " + searchAdapter.getSearchList());
+            Log.d(TAG, "adapter resultList: " + searchAdapter.getResultList());
         }
     }
 
@@ -99,22 +96,31 @@ public class SearchFragment extends Fragment {
         searchBar.addTextChangedListener(new TextChangedListener<EditText>(searchBar) {
             @Override
             public void onTextChanged(EditText target, Editable s) {
-                searchAdapter.filter(s.toString());
+                users = searchAdapter.filter(s.toString());
+                Log.i(TAG, "Query: " + s);
+                //searchAdapter.updateLocalData(users);
+                Log.d(TAG, "search list updated");
             }
         });
 
         focusSearchBar();
 
+        User currentUser = this.sessionManager.getCurrentUser();
+
         // setup viewmodel and callbacks
         vm = new ViewModelProvider(requireActivity()).get(SearchViewModel.class);
-        vm.getContacts(this.sessionManager.getCurrentUser().getUid());
-        vm.getSearchSorted().observe(getViewLifecycleOwner(), new SearchFragment.SearchObserver());
+        vm.getUsers(currentUser).observe(getViewLifecycleOwner(), new SearchFragment.SearchObserver());
+        //vm.getContacts(currentUser.getUid());
+        //vm.getContactsSorted().observe(getViewLifecycleOwner(), new SearchFragment.SearchObserver());
+
         // setup recyclerview
         RecyclerView searchRecyclerView = view.findViewById(R.id.searchList);
         searchRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        searchAdapter = new SearchAdapter(contacts, this);
+        searchAdapter = new SearchAdapter(users, this);
         searchRecyclerView.setAdapter(searchAdapter);
+
     }
+
 
     private void focusSearchBar() {
         searchBar.requestFocus();
