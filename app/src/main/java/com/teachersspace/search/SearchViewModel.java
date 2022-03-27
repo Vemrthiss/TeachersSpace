@@ -14,9 +14,6 @@ import com.google.firebase.firestore.QuerySnapshot;
 import com.teachersspace.data.UserRepository;
 import com.teachersspace.models.User;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
