@@ -127,14 +127,6 @@ public class UserRepository extends SingleFirebaseCollectionRepository {
         getCollection()
                 .document(userUid)
                 .update("name", newName)
-                .addOnSuccessListener(unused -> Log.d(TAG, "updated display name"))
-                .addOnFailureListener(e -> Log.w(TAG, "error updating document", e));
-    }
-
-    public void updateDisplayName(String userUid, String newName) {
-        getCollection()
-                .document(userUid)
-                .update("name", newName)
                 .addOnSuccessListener(unused -> {
                     Log.d(TAG, "updated display name");
                 })
