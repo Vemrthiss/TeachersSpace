@@ -46,7 +46,6 @@ public class UserRepository extends SingleFirebaseCollectionRepository {
         List<User.UserType> contactable = new ArrayList<>();
         if (userType.equals(User.UserType.TEACHER)) {
             contactable.add(User.UserType.PARENT);
-            contactable.add(User.UserType.STUDENT);
         } else {
             contactable.add(User.UserType.TEACHER);
         }

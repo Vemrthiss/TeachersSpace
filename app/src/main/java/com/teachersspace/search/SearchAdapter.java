@@ -62,7 +62,7 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
     /**
      * Create new views (invoked by the layout manager)
      * @param parent Parent ViewGroup
-     * @param viewType Type of view
+     * @param viewType The view type of the new View.
      * @return viewHolder
      */
     @NonNull
