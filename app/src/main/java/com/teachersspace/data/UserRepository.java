@@ -16,6 +16,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 import com.teachersspace.models.User;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.function.Consumer;
@@ -26,6 +27,34 @@ public class UserRepository extends SingleFirebaseCollectionRepository {
     @Override
     protected String getCollectionPath() {
         return "users";
+    }
+
+    public void getAllUsers(OnCompleteListener<QuerySnapshot> onCompleteListener){
+        getCollection()
+                .get()
+                .addOnCompleteListener(onCompleteListener);
+    }
+
+    public void getOtherUsers(String uid, OnCompleteListener<QuerySnapshot> onCompleteListener) {
+        getCollection()
+                .whereNotEqualTo("uid", uid)
+                .get()
+                .addOnCompleteListener(onCompleteListener);
+    }
+
+    public void getOtherUsers(User.UserType userType, OnCompleteListener<QuerySnapshot> onCompleteListener) {
+        List<User.UserType> contactable = new ArrayList<>();
+        if (userType.equals(User.UserType.TEACHER)) {
+            contactable.add(User.UserType.PARENT);
+            contactable.add(User.UserType.STUDENT);
+        } else {
+            contactable.add(User.UserType.TEACHER);
+        }
+
+        getCollection()
+                .whereIn("userType", contactable)
+                .get()
+                .addOnCompleteListener(onCompleteListener);
     }
 
     public void getUserByUid(String uid, OnCompleteListener<QuerySnapshot> onCompleteListener) {
@@ -82,24 +111,24 @@ public class UserRepository extends SingleFirebaseCollectionRepository {
         getCollection()
                 .document(userUid)
                 .update("officeStart", newStart)
-                .addOnSuccessListener(unused -> {
-                    Log.d(TAG, "updated teacher start office hours");
-                })
-                .addOnFailureListener(e -> {
-                    Log.w(TAG, "error updating document", e);
-                });
+                .addOnSuccessListener(unused -> Log.d(TAG, "updated teacher start office hours"))
+                .addOnFailureListener(e -> Log.w(TAG, "error updating document", e));
     }
 
     public void updateEndOfficeHours(String userUid, Date newEnd) {
         getCollection()
                 .document(userUid)
                 .update("officeEnd", newEnd)
-                .addOnSuccessListener(unused -> {
-                    Log.d(TAG, "updated teacher end office hours");
-                })
-                .addOnFailureListener(e -> {
-                    Log.w(TAG, "error updating document", e);
-                });
+                .addOnSuccessListener(unused -> Log.d(TAG, "updated teacher end office hours"))
+                .addOnFailureListener(e -> Log.w(TAG, "error updating document", e));
+    }
+
+    public void updateDisplayName(String userUid, String newName) {
+        getCollection()
+                .document(userUid)
+                .update("name", newName)
+                .addOnSuccessListener(unused -> Log.d(TAG, "updated display name"))
+                .addOnFailureListener(e -> Log.w(TAG, "error updating document", e));
     }
 
     public void updateDisplayName(String userUid, String newName) {

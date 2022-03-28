@@ -94,6 +94,9 @@ public class User {
         setEmail(email);
         setUserType(userType);
     }
+    public User(User user) {
+        this(user.getUid(), user.getName(), user.getEmail(), user.getUserType(), new HashMap<>(user.getContacts()), new ArrayList<>(user.getTimeSlots()));
+    }
     public User() {}
 
     public String serialise() {
