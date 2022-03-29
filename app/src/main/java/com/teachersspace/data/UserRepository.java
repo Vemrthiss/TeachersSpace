@@ -11,6 +11,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.teachersspace.models.User;
@@ -18,7 +19,9 @@ import com.teachersspace.models.User;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 public class UserRepository extends SingleFirebaseCollectionRepository {
@@ -102,9 +105,11 @@ public class UserRepository extends SingleFirebaseCollectionRepository {
                 .addSnapshotListener(snapshotListener);
     }
 
-//    public void addContact() {
-//
-//    }
+    public void addContact(String userUID, String contactUID) {
+        getCollection()
+                .document(userUID)
+                .update("contacts." + contactUID, FieldValue.serverTimestamp());
+    }
 
     public void updateStartOfficeHours(String userUid, Date newStart) {
         getCollection()
