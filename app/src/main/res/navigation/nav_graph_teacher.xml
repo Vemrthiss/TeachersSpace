@@ -40,6 +40,20 @@
         android:id="@+id/daily_schedule_fragment"
         android:name="com.teachersspace.schedule.DailyScheduleFragment"
         android:label="DailyScheduleFragment">
+
+        <action
+            android:id="@+id/navigate_edit_event_action"
+            app:destination="@id/edit_event_fragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/edit_event_fragment"
+        android:name="com.teachersspace.schedule.EditEventFragment"
+        android:label="EditEventFragment">
+
+        <argument
+            android:name="t"
+            app:argType="string"/>
     </fragment>
 
     <fragment

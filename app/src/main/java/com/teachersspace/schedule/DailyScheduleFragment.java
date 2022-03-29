@@ -18,7 +18,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
+import androidx.navigation.NavDirections;
+import androidx.navigation.fragment.NavHostFragment;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.firebase.firestore.DocumentReference;
@@ -164,19 +165,10 @@ public class DailyScheduleFragment extends Fragment {
         hourListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-
-                Fragment fragment = new EditEventFragment();
-                FragmentTransaction fragmentTransaction = getActivity().getSupportFragmentManager().beginTransaction();
-
                 //creating bundle with required string
                 Bundle b = new Bundle();
                 b.putString("t", String.valueOf(hourEventList().get(i).time));
-                fragment.setArguments(b);
-
-                //continue to execute new fragment
-                fragmentTransaction.replace(R.id.nav_host_fragment_teacher, fragment);
-                fragmentTransaction.addToBackStack(null);
-                fragmentTransaction.commit();
+                openEditEvent(b);
             }
         });
     }
@@ -213,5 +205,21 @@ public class DailyScheduleFragment extends Fragment {
             CalendarUtils.selectedDate = CalendarUtils.selectedDate.plusDays(1);
             setDayView(view);
         };
+    }
+
+    public void openEditEvent(Bundle args) {
+        NavDirections directions = new NavDirections() {
+            @NonNull
+            @Override
+            public Bundle getArguments() {
+                return args;
+            }
+
+            @Override
+            public int getActionId() {
+                    return R.id.navigate_edit_event_action;
+                }
+        };
+        NavHostFragment.findNavController(DailyScheduleFragment.this).navigate(directions);
     }
 }
