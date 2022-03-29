@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -48,7 +49,6 @@ public class ScheduleFragment extends Fragment implements CalendarAdapter.OnItem
     private Button dailyButton;
     private TextView monthYearText;
     private RecyclerView calendarRecyclerView;
-    public static String TeacherName;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private DocumentReference docRef = db.collection("profschedule").document(String.valueOf(getUserUid()));
 
@@ -86,46 +86,13 @@ public class ScheduleFragment extends Fragment implements CalendarAdapter.OnItem
         monthYearText = view.findViewById(R.id.monthYearTV);
         nextButton = view.findViewById(R.id.nextMonth);
         prevButton = view.findViewById(R.id.prevMonth);
-        dailyButton = view.findViewById(R.id.dailyButton);
+        //dailyButton = view.findViewById(R.id.dailyButton);
 
         nextButton.setOnClickListener(nextMonthAction());
         prevButton.setOnClickListener(previousMonthAction());
-        dailyButton.setOnClickListener(dailyAction());
-
+        //dailyButton.setOnClickListener(dailyAction());
 
     }
-
-    //to update once
-//    private void InitialiseEventsInEventsList() {
-//        ArrayList<Event> tempEventList = new ArrayList<>();
-//        docRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-//            @RequiresApi(api = Build.VERSION_CODES.O)
-//            @Override
-//            public void onSuccess(DocumentSnapshot documentSnapshot) {
-//                if (documentSnapshot.exists()) {
-//                    //get all events
-//                    Map<String, Object> temp = documentSnapshot.getData();
-//                    ArrayList<HashMap<String, String>> tempArray = (ArrayList<HashMap<String, String>>) temp.get("slots");
-//
-//                    if (!tempArray.isEmpty()){
-//                        for (int i = 0; i < tempArray.size(); i++){
-//                            String eventName = tempArray.get(i).get("Event");
-//                            LocalDate date = LocalDate.parse(tempArray.get(i).get("Date"));
-//                            LocalTime time = LocalTime.parse(tempArray.get(i).get("Time"));
-//                            Boolean booking = Boolean.parseBoolean(tempArray.get(i).get("isBooked"));
-//                            String teacher_id = tempArray.get(i).get("Teacher_id");
-//                            String student_id = tempArray.get(i).get("Student_Name");
-//
-//                            Event newEvent = new Event(eventName, date, time, booking, teacher_id, student_id);
-//                            tempEventList.add(newEvent);
-//                        }
-//                        Event.eventsList = tempEventList;
-//                    }
-//                }
-//            }
-//        });
-//    }
-
 
     private void InitialiseArray(){
         docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
@@ -183,22 +150,24 @@ public class ScheduleFragment extends Fragment implements CalendarAdapter.OnItem
         };
     }
 
+//    //removing for now: might be buggy
 
-    public View.OnClickListener dailyAction() {
-        return view -> {
-            NavDirections directions = new NavDirections() {
-                @NonNull
-                @Override
-                public Bundle getArguments() {
-                    return new Bundle();
-                }
+//    public View.OnClickListener dailyAction() {
+//        return view -> {
+//            NavDirections directions = new NavDirections() {
+//                @NonNull
+//                @Override
+//                public Bundle getArguments() {
+//                    return new Bundle();
+//                }
+//
+//                @Override
+//                public int getActionId() {
+//                    return R.id.navigate_daily_schedule_action;
+//                }
+//            };
+//            NavHostFragment.findNavController(ScheduleFragment.this).navigate(directions);
+//        };
+//    }
 
-                @Override
-                public int getActionId() {
-                    return R.id.navigate_daily_schedule_action;
-                }
-            };
-            NavHostFragment.findNavController(ScheduleFragment.this).navigate(directions);
-        };
-    }
 }

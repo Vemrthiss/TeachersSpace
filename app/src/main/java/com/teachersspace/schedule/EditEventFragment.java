@@ -19,9 +19,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavController;
+import androidx.navigation.fragment.NavHostFragment;
 
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.teachersspace.R;
 
@@ -34,9 +37,7 @@ import java.util.Map;
 
 public class EditEventFragment extends Fragment {
 
-    private EditText eventNameET;
     private TextView eventDateTV, eventTimeTV;
-    private String timeFromArr, dateFromArr;
     private String timeFromArrString;
     private LocalTime time;
     private String eventName = "Free Time Allocated";
@@ -62,7 +63,6 @@ public class EditEventFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         Bundle b = new Bundle();
         b = getArguments();
-        timeFromArr = CalendarUtils.selectedDate + " " + b.getString("t") + ":00";
         timeFromArrString = CalendarUtils.selectedDate.toString() + " " + b.getString("t") + ":00";
         DateTimeFormatter timeFmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         initWidgets(view);
@@ -121,12 +121,12 @@ public class EditEventFragment extends Fragment {
             Event.UserTextList.add(userData);
             Event.eventsList.add(newEvent);
 
-
             //updates firestore - change method
-            updateFireStore(Event.UserTextList);
+            docRef.update("slots", FieldValue.arrayUnion(userData));
 
-            //goes back to daily calendar
-            getActivity().onBackPressed();
+            //go back to previous fragment
+            NavHostFragment.findNavController(this).navigateUp();
+
         }
 
     }
@@ -134,7 +134,6 @@ public class EditEventFragment extends Fragment {
     public void DeleteEventAction() {
 
         int index_event = -1;
-        int index_text = -1;
         String dontHave = "There is no existing event in this timeslot to delete.";
         for (int i = 0; i < Event.eventsList.size(); i++){
             if (time.equals(Event.eventsList.get(i).getTime())
@@ -147,12 +146,10 @@ public class EditEventFragment extends Fragment {
         if (index_event != -1){
 
             Event.eventsList.remove(index_event);
-            Event.UserTextList.remove(index_text);
-
             //updates firestore - change method
-            updateFireStore(Event.UserTextList);
+            docRef.update("slots", FieldValue.arrayRemove(Event.UserTextList.get(index_event)));
+            NavHostFragment.findNavController(this).navigateUp();
 
-            getActivity().onBackPressed();
         }
 
         else{

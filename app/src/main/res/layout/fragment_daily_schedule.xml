@@ -33,14 +33,14 @@
             android:text="Feb 2021"
             android:textSize="20sp"
             android:textAlignment="center"
-            android:textColor="@color/black"/>
+            android:textColor="@color/beige"/>
 
         <Button
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:id="@+id/nextDay"
-            android:text="forward"
+            android:text="next"
             android:background="@null"
             android:textStyle="bold"
             android:onClick="nextDayAction"
