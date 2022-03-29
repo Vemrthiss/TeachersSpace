@@ -170,6 +170,7 @@ public class CommunicationsFragment extends Fragment {
      * The UI state when there is an active call
      */
     public void setCallUI() {
+        toggleNavbar(false);
         inactiveCallLayout.setVisibility(View.INVISIBLE);
         activeCallLayout.setVisibility(View.VISIBLE);
         callActionFab.hide();
@@ -179,13 +180,13 @@ public class CommunicationsFragment extends Fragment {
         chronometer.setVisibility(View.VISIBLE);
         chronometer.setBase(SystemClock.elapsedRealtime());
         chronometer.start();
-        toggleNavbar(false);
     }
 
     /*
      * Reset UI elements
      */
     public void resetUI() {
+        toggleNavbar(true);
         inactiveCallLayout.setVisibility(View.VISIBLE);
         activeCallLayout.setVisibility(View.INVISIBLE);
         callActionFab.show();
@@ -199,7 +200,6 @@ public class CommunicationsFragment extends Fragment {
         hangupActionFab.hide();
         chronometer.setVisibility(View.INVISIBLE);
         chronometer.stop();
-        toggleNavbar(true);
     }
 
     public void applyFabState(String buttonWhich, boolean enabled) {

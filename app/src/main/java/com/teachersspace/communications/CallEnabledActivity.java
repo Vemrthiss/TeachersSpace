@@ -44,6 +44,7 @@ import androidx.navigation.NavDirections;
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -98,6 +99,7 @@ public abstract class CallEnabledActivity extends AppCompatActivity implements C
 
     private String accessToken;
     private TwilioTokenManager tokenManager;
+    private SessionManager sessionManager;
 
     private final UserRepository userRepository = new UserRepository();
 
@@ -256,6 +258,8 @@ public abstract class CallEnabledActivity extends AppCompatActivity implements C
         communicationsViewModel = new ViewModelProvider(this).get(CommunicationsViewModel.class);
         communicationsViewModel.getActiveContact().observe(this, new NewActiveContactCallback());
         communicationsViewModel.getIsOutsideOfficeHours().observe(this, new NewActiveContactContactableCallback());
+
+        this.sessionManager = new SessionManager(this);
     }
 
     private void getCommunicationsFragment() {
@@ -354,6 +358,10 @@ public abstract class CallEnabledActivity extends AppCompatActivity implements C
                     break;
                 case Constants.ACTION_ACCEPT:
                     answer(callFrom);
+                    break;
+                case Constants.ACTION_INCOMING_MESSAGE_NOTIFICATION:
+                    String fromUid = intent.getStringExtra(Constants.INCOMING_MESSAGE_FROM_UID);
+                    goToConversation(fromUid);
                     break;
                 default:
                     break;
@@ -508,8 +516,25 @@ public abstract class CallEnabledActivity extends AppCompatActivity implements C
                 String accessToken = getStoredTwilioToken();
                 Log.i(TAG, accessToken + " Registering with FCM" + tokenResult);
                 Voice.register(accessToken, Voice.RegistrationChannel.FCM, tokenResult, registrationListener);
+                registerForMessageNotifications();
             }
         });
+    }
+
+    private void registerForMessageNotifications() {
+        String topic = "/topics/" + this.sessionManager.getCurrentUser().getUid();
+        FirebaseMessaging.getInstance().subscribeToTopic(topic).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                Log.i(TAG, "successfully subscribed to fcm messaging topic");
+            } else {
+                Log.w(TAG, "could not subscribe to fcm messaging topic");
+            }
+        });
+    }
+
+    private void unregisterForMessageNotifications() {
+        String topic = "/topics/" + this.sessionManager.getCurrentUser().getUid();
+        FirebaseMessaging.getInstance().unsubscribeFromTopic(topic);
     }
 
     private RegistrationListener registrationListener() {
@@ -534,6 +559,54 @@ public abstract class CallEnabledActivity extends AppCompatActivity implements C
                 Snackbar.make(coordinatorLayout, message, Snackbar.LENGTH_LONG).show();
             }
         };
+    }
+
+    private void goToConversation(String fromUid) {
+        stopService(new Intent(getApplicationContext(), IncomingCallNotificationService.class));
+        if (communicationsFragment == null) {
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+            Looper mainLooper = Looper.getMainLooper();
+            Handler handler = new Handler(mainLooper);
+            executor.execute(() -> {
+                // perform async tasks here
+                OnCompleteListener<QuerySnapshot> callback = task -> {
+                    if (task.isSuccessful()) {
+                        QuerySnapshot result = task.getResult();
+                        if (result != null && !result.isEmpty()) {
+                            List<User> users = result.toObjects(User.class);
+                            User senderUser = users.get(0);
+
+                            handler.post(() -> {
+                                NavDirections directions = new NavDirections() {
+                                    @Override
+                                    public int getActionId() {
+                                        return R.id.navigate_single_contact_action;
+                                    }
+
+                                    @NonNull
+                                    @Override
+                                    public Bundle getArguments() {
+                                        Bundle args = new Bundle();
+                                        args.putString("contact", senderUser.serialise());
+                                        return args;
+                                    }
+                                };
+                                NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager().findFragmentById(getNavFragmentContainer());
+                                if (navHostFragment != null) {
+                                    NavController navController = navHostFragment.getNavController();
+                                    navController.navigate(directions);
+                                }
+                            });
+                        }
+                    } else {
+                        Log.d(TAG, "Error getting documents: ", task.getException());
+                    }
+                };
+                userRepository.getUserByUid(fromUid, callback);
+            });
+            return;
+        }
+        getCommunicationsFragment();
     }
 
     /**

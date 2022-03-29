@@ -1,10 +1,12 @@
 package com.teachersspace.fcm;
 
 import android.content.Intent;
+import android.os.Build;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
@@ -16,6 +18,8 @@ import com.twilio.voice.CallInvite;
 import com.twilio.voice.CancelledCallInvite;
 import com.twilio.voice.MessageListener;
 import com.twilio.voice.Voice;
+
+import java.util.Map;
 
 public class VoiceFirebaseMessagingService extends FirebaseMessagingService {
     private static final String TAG = "VoiceFCMService";
@@ -54,6 +58,16 @@ public class VoiceFirebaseMessagingService extends FirebaseMessagingService {
             if (!valid) {
                 Log.e(TAG, "The message was not a valid Twilio Voice SDK payload: " +
                         remoteMessage.getData());
+
+                // here, a text MESSAGE is detected
+                Map<String, String> payload = remoteMessage.getData();
+                String fromUid = payload.get("fromUid");
+                String body = payload.get("body");
+                String id = payload.get("notificationId");
+                if (id != null && fromUid != null) {
+                    int notificationId = Integer.parseInt(id);
+                    handleIncomingMessage(notificationId, fromUid, body);
+                }
             }
         }
     }
@@ -81,5 +95,18 @@ public class VoiceFirebaseMessagingService extends FirebaseMessagingService {
         intent.putExtra(Constants.CANCELLED_CALL_INVITE, cancelledCallInvite);
 
         startService(intent);
+    }
+
+    private void handleIncomingMessage(int notificationId, String fromUid, String body) {
+        Intent intent = new Intent(this, IncomingCallNotificationService.class);
+        intent.setAction(Constants.ACTION_INCOMING_MESSAGE);
+        intent.putExtra(Constants.INCOMING_MESSAGE_NOTIFICATION_ID, notificationId);
+        intent.putExtra(Constants.INCOMING_MESSAGE_FROM, fromUid);
+        intent.putExtra(Constants.INCOMING_MESSAGE_BODY, body);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(intent);
+        } else {
+            startService(intent);
+        }
     }
 }

@@ -13,4 +13,10 @@ public class Constants {
     public static final String ACTION_INCOMING_CALL = "ACTION_INCOMING_CALL";
     public static final String ACTION_CANCEL_CALL = "ACTION_CANCEL_CALL";
     public static final String ACTION_FCM_TOKEN = "ACTION_FCM_TOKEN";
+    public static final String ACTION_INCOMING_MESSAGE = "ACTION_INCOMING_MESSAGE";
+    public static final String INCOMING_MESSAGE_FROM = "INCOMING_MESSAGE_FROM";
+    public static final String INCOMING_MESSAGE_FROM_UID = "INCOMING_MESSAGE_FROM_UID";
+    public static final String INCOMING_MESSAGE_BODY = "INCOMING_MESSAGE_BODY";
+    public static final String INCOMING_MESSAGE_NOTIFICATION_ID = "INCOMING_MESSAGE_NOTIFICATION_ID";
+    public static final String ACTION_INCOMING_MESSAGE_NOTIFICATION = "ACTION_INCOMING_MESSAGE_NOTIFICATION";
 }

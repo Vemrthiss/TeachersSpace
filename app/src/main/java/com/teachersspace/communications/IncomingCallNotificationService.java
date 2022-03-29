@@ -81,6 +81,9 @@ public class IncomingCallNotificationService extends Service {
                 case Constants.ACTION_CANCEL_CALL:
                     handleCancelledCall(intent);
                     break;
+                case Constants.ACTION_INCOMING_MESSAGE:
+                    handleIncomingMessage(intent);
+                    break;
                 default:
                     break;
             }
@@ -288,5 +291,92 @@ public class IncomingCallNotificationService extends Service {
                 .getLifecycle()
                 .getCurrentState()
                 .isAtLeast(Lifecycle.State.STARTED);
+    }
+
+    private void handleIncomingMessage(Intent intent) {
+        String fromUid = intent.getStringExtra(Constants.INCOMING_MESSAGE_FROM);
+        String body = intent.getStringExtra(Constants.INCOMING_MESSAGE_BODY);
+        int notificationId = intent.getIntExtra(Constants.INCOMING_MESSAGE_NOTIFICATION_ID, 0);
+
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        Looper mainLooper = Looper.getMainLooper();
+        Handler handler = new Handler(mainLooper);
+
+        executor.execute(() -> {
+            OnCompleteListener<QuerySnapshot> callback = task -> {
+                if (task.isSuccessful()) {
+                    QuerySnapshot result = task.getResult();
+                    if (result != null && !result.isEmpty()) {
+                        List<User> users = result.toObjects(User.class);
+                        User fromUser = users.get(0);
+
+                        handler.post(() -> {
+                            String fromUserName = fromUser.getName();
+                            if (isAppVisible()) {
+                                startForeground(notificationId, createMessageNotification(notificationId, fromUid, fromUserName, body, NotificationManager.IMPORTANCE_LOW));
+                            } else {
+                                startForeground(notificationId, createMessageNotification(notificationId, fromUid, fromUserName, body, NotificationManager.IMPORTANCE_HIGH));
+                            }
+                        });
+                    }
+                } else {
+                    Log.d(TAG, "Error getting documents: ", task.getException());
+                }
+            };
+            userRepository.getUserByUid(fromUid, callback);
+        });
+    }
+
+    private Notification createMessageNotification(int notificationId, String fromUid, String fromUserName, String body, int channelImportance) {
+        Log.d(TAG, "createMessageNotification is called" + fromUserName + body);
+
+        Intent intent = new Intent(this, getUserActivityClass());
+        intent.setAction(Constants.ACTION_INCOMING_MESSAGE_NOTIFICATION);
+        intent.putExtra(Constants.INCOMING_MESSAGE_NOTIFICATION_ID, notificationId);
+        intent.putExtra(Constants.INCOMING_MESSAGE_FROM, fromUserName);
+        intent.putExtra(Constants.INCOMING_MESSAGE_FROM_UID, fromUid);
+        intent.putExtra(Constants.INCOMING_MESSAGE_BODY, body);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        PendingIntent pendingIntent =
+                PendingIntent.getActivity(this, notificationId, intent, PendingIntent.FLAG_IMMUTABLE);
+
+        String text = fromUserName + ": " + body;
+
+        Bundle extras = new Bundle();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            return buildMessageNotification(text, pendingIntent, extras, createChannel(channelImportance));
+        } else {
+            //noinspection deprecation
+            return new NotificationCompat.Builder(this)
+                    .setSmallIcon(R.drawable.ic_notifications_black_24dp)
+                    .setContentTitle(getString(R.string.app_name))
+                    .setContentText(text)
+                    .setAutoCancel(true)
+                    .setExtras(extras)
+                    .setContentIntent(pendingIntent)
+                    .setGroup("test_app_notification")
+                    .setCategory(Notification.CATEGORY_MESSAGE)
+                    .setColor(Color.rgb(214, 10, 37)).build();
+        }
+    }
+
+    @TargetApi(Build.VERSION_CODES.O)
+    private Notification buildMessageNotification(String text,
+                                                  PendingIntent pendingIntent,
+                                                  Bundle extras,
+                                                  String channelId) {
+
+        NotificationCompat.Builder builder =
+                new NotificationCompat.Builder(getApplicationContext(), channelId)
+                        .setSmallIcon(R.drawable.ic_notifications_black_24dp)
+                        .setContentTitle(getString(R.string.app_name))
+                        .setContentText(text)
+                        .setCategory(Notification.CATEGORY_MESSAGE)
+                        .setExtras(extras)
+                        .setAutoCancel(true)
+                        .setContentIntent(pendingIntent);
+                        //.setFullScreenIntent(pendingIntent, true);
+
+        return builder.build();
     }
 }
