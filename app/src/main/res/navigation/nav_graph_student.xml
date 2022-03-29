@@ -34,7 +34,13 @@
     <fragment
         android:id="@+id/search_fragment"
         android:name="com.teachersspace.search.SearchFragment"
-        android:label="SearchFragment"/>
+        android:label="SearchFragment">
+        <!--TODO: student does not navigate to communications fragment from search-->
+        <action
+            android:id="@+id/navigate_single_result_action"
+            app:destination="@id/communications_fragment" />
+
+    </fragment>
     <fragment
         android:id="@+id/settings_fragment"
         android:name="com.teachersspace.settings.SettingsFragment"
