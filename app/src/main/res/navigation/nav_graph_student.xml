@@ -25,20 +25,21 @@
     </fragment>
 
     <fragment
-        android:id="@+id/schedule_fragment"
-        android:name="com.teachersspace.schedule.ScheduleFragment"
-        android:label="ContactsFragment">
-
+        android:id="@+id/student_schedule_fragment"
+        android:name="com.teachersspace.schedule.StudentScheduleFragment"
+        android:label="StudentScheduleFragment">
+        <argument
+            android:name="contact"
+            app:argType="string"/>
     </fragment>
 
     <fragment
         android:id="@+id/search_fragment"
         android:name="com.teachersspace.search.SearchFragment"
         android:label="SearchFragment">
-        <!--TODO: student does not navigate to communications fragment from search-->
         <action
             android:id="@+id/navigate_single_result_action"
-            app:destination="@id/communications_fragment" />
+            app:destination="@id/student_schedule_fragment" />
 
     </fragment>
     <fragment
