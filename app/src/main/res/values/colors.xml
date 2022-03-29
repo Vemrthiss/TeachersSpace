@@ -11,6 +11,8 @@
     <color name="blue_500">#253943</color>
     <color name="blue_700">#0F232D</color>
     <color name="beige">#FFF5D6</color>
+    <color name="dark_brown">#432f25</color>
+    <color name="light_beige">#FFFAEA</color>
     <color name="brown_200">#CFA586</color>
     <color name="brown_500">#B38B6D</color>
 </resources>

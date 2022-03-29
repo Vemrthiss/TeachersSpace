@@ -65,11 +65,11 @@ public class HourAdapter extends ArrayAdapter<HourEvent>  {
         textView.setText(event.getName());
         textView.setVisibility(View.VISIBLE);
         if(event.getBookingStatus() == true){
-            int color = Color.parseColor("#86B049");
+            int color = Color.parseColor("#432f25");
             textView.setBackgroundColor(color);
         }
         else if (event.getBookingStatus() == false){
-            int color = Color.parseColor("#0000FF");
+            int color = Color.parseColor("#B38B6D");
             textView.setBackgroundColor(color);
         }
     }

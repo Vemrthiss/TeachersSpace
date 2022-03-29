@@ -162,14 +162,11 @@ public class DailyScheduleFragment extends Fragment {
     {
         HourAdapter hourAdapter = new HourAdapter(getContext(), hourEventList());
         hourListView.setAdapter(hourAdapter);
-        hourListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                //creating bundle with required string
-                Bundle b = new Bundle();
-                b.putString("t", String.valueOf(hourEventList().get(i).time));
-                openEditEvent(b);
-            }
+        hourListView.setOnItemClickListener((adapterView, view1, i, l) -> {
+            //creating bundle with required string
+            Bundle b = new Bundle();
+            b.putString("t", String.valueOf(hourEventList().get(i).time));
+            openEditEvent(b);
         });
     }
 

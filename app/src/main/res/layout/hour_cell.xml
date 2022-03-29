@@ -11,11 +11,11 @@
         android:gravity="center"
         android:id="@+id/timeTV"
         android:textSize="20sp"
-        android:textColor="@color/black"
+        android:textColor="@color/beige"
         android:text="10:00"/>
 
     <LinearLayout
-        android:background="#EEE"
+        android:background="@color/light_beige"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:padding="5dp">
@@ -24,13 +24,13 @@
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_margin="5dp"
-            android:background="#0000FF"
+            android:background="@color/brown_500"
             android:layout_height="match_parent"
             android:gravity="center"
             android:id="@+id/event1"
             android:textSize="12sp"
             android:lines="2"
-            android:textColor="@color/white"
+            android:textColor="@color/beige"
             android:text="Event 1"/>
 
 
