@@ -186,7 +186,7 @@ public class CommunicationsFragment extends Fragment {
      * Reset UI elements
      */
     public void resetUI() {
-        toggleNavbar(true);
+        toggleNavbar(false);
         inactiveCallLayout.setVisibility(View.VISIBLE);
         activeCallLayout.setVisibility(View.INVISIBLE);
         callActionFab.show();
@@ -236,12 +236,14 @@ public class CommunicationsFragment extends Fragment {
                 }
             };
             NavHostFragment.findNavController(CommunicationsFragment.this).navigate(directions);
+            toggleNavbar(true);
         };
     }
 
     @Override
     public void onDestroyView() {
         vm.deregisterListener();
+        toggleNavbar(true);
         super.onDestroyView();
     }
 
