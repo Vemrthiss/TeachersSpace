@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.teachersspace.R;
@@ -51,14 +52,6 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
         resultList = (ArrayList<User>) dataSet;
     }
 
-    public List<User> getResultList() {
-        return this.resultList;
-    }
-    public List<User> getSearchList() {
-        return this.searchList;
-    }
-
-
     /**
      * Create new views (invoked by the layout manager)
      * @param parent Parent ViewGroup
@@ -86,22 +79,16 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
         // contents of the view with that element
 
         Button singleContactButton = holder.getButtonView();
-        if (position < resultList.size()) {
-            User user = resultList.get(position);
-
-            singleContactButton.setText(user.getName());
-            singleContactButton.setOnClickListener(searchFragment.searchIndividualListenerFactory(position));
-        } else {
-            singleContactButton.setText(R.string.search_nil);
-            singleContactButton.setOnClickListener(null);
-        }
+        User user = resultList.get(position);
+        singleContactButton.setText(user.getName());
+        singleContactButton.setOnClickListener(searchFragment.searchIndividualListenerFactory(position));
     }
     /**
      * @return the size of dataset (invoked by the layout manager)
      */
     @Override
     public int getItemCount() {
-        return searchList.size();
+        return resultList.size();
     }
 
     public void updateLocalData(List<User> newData) {

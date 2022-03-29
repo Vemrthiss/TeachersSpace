@@ -77,8 +77,6 @@ public class SearchFragment extends Fragment {
             users = updatedResults;
             Log.d(TAG, users.toString());
             searchAdapter.updateLocalData(users);
-            Log.d(TAG, "adapter searchList: " + searchAdapter.getSearchList());
-            Log.d(TAG, "adapter resultList: " + searchAdapter.getResultList());
         }
     }
 
