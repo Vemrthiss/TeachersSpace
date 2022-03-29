@@ -38,10 +38,11 @@ public class MessageRepository extends SingleFirebaseCollectionRepository {
     public void postMessage(Message message){
         getDocumentReference()
                 .collection("messages")
-                .add(message)
-                .addOnCompleteListener(new OnCompleteListener<DocumentReference>(){
+                .document(message.getUid())
+                .set(message)
+                .addOnCompleteListener(new OnCompleteListener(){
                     @Override
-                    public void onComplete(@NonNull Task<DocumentReference> task) {
+                    public void onComplete(@NonNull Task task) {
                         if (task.isSuccessful()){
                             String[] uids = chatUID.split("-");
                             notifyUsers(uids[0], uids[1]);
