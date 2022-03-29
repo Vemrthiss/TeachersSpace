@@ -84,10 +84,17 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         // Get element from your dataset at this position and replace the
         // contents of the view with that element
-        User user = resultList.get(position);
+
         Button singleContactButton = holder.getButtonView();
-        singleContactButton.setText(user.getName());
-        singleContactButton.setOnClickListener(searchFragment.contactsIndividualListenerFactory(position));
+        if (position < resultList.size()) {
+            User user = resultList.get(position);
+
+            singleContactButton.setText(user.getName());
+            singleContactButton.setOnClickListener(searchFragment.searchIndividualListenerFactory(position));
+        } else {
+            singleContactButton.setText(R.string.search_nil);
+            singleContactButton.setOnClickListener(null);
+        }
     }
     /**
      * @return the size of dataset (invoked by the layout manager)
@@ -130,12 +137,9 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
                 if (username.contains(query)) matches.add(user);
                 else unmatches.add(user);
             }
-            if (matches.size() > 0) {
-                Log.d(TAG, String.format("Added matches: %s", matches));
-                resultList.clear();
-                resultList.addAll(matches);
-                resultList.addAll(unmatches);
-            } else Log.d(TAG, "No match");
+            Log.d(TAG, String.format("Added matches: %s", matches));
+            resultList.clear();
+            resultList.addAll(matches);
 
             Log.i(TAG, "Filtered by query");
         }
