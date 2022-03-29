@@ -2,6 +2,8 @@ package com.teachersspace.data;
 
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
@@ -36,7 +38,16 @@ public class MessageRepository extends SingleFirebaseCollectionRepository {
     public void postMessage(Message message){
         getDocumentReference()
                 .collection("messages")
-                .add(message);
+                .add(message)
+                .addOnCompleteListener(new OnCompleteListener<DocumentReference>(){
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentReference> task) {
+                        if (task.isSuccessful()){
+                            String[] uids = chatUID.split("-");
+                            notifyUsers(uids[0], uids[1]);
+                        }
+                    }
+                });
     }
 
     public void subscribeToMessageUpdates(EventListener<QuerySnapshot> listenerCallback){
@@ -46,14 +57,9 @@ public class MessageRepository extends SingleFirebaseCollectionRepository {
                 .addSnapshotListener(listenerCallback);
     }
 
-    /**
-     * updates the FROM and TO users' "contacts" field in firestore
-     * with the CURRENT DATETIME
-     * actually, should call methods from UserRepository since it concerns users
-     * @param fromUserUid user UID of the user who sent the message
-     * @param toUserUid user UID of the user who is to receive the message
-     */
     private void notifyUsers(String fromUserUid, String toUserUid) {
-        // TODO
+        UserRepository userRepo = new UserRepository();
+        userRepo.addContact(fromUserUid, toUserUid);
+        userRepo.addContact(toUserUid, fromUserUid);
     }
 }

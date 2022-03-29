@@ -141,6 +141,8 @@ public class CommunicationsFragment extends Fragment {
                 messageRepository.setChatUID(activeContact.getUid() + "-" + user.getUid());
             }
 
+            messageRepository.postMessage(new Message("halooo", user.getUid(), activeContact.getUid(), new Date()));
+
             messageRepository.subscribeToMessageUpdates(new EventListener<QuerySnapshot>() {
                 @Override
                 public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
