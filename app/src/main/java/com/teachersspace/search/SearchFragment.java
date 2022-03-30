@@ -36,7 +36,7 @@ public class SearchFragment extends Fragment {
     private SearchAdapter searchAdapter;
     private List<User> users = new ArrayList<>(); // list of users to show in RecyclerView
 
-    public SearchFragment.SearchIndividualListener contactsIndividualListenerFactory(int position) {
+    public SearchFragment.SearchIndividualListener searchIndividualListenerFactory(int position) {
         return new SearchFragment.SearchIndividualListener(position);
     }
     private class SearchIndividualListener implements View.OnClickListener {
@@ -77,8 +77,6 @@ public class SearchFragment extends Fragment {
             users = updatedResults;
             Log.d(TAG, users.toString());
             searchAdapter.updateLocalData(users);
-            Log.d(TAG, "adapter searchList: " + searchAdapter.getSearchList());
-            Log.d(TAG, "adapter resultList: " + searchAdapter.getResultList());
         }
     }
 
