@@ -22,6 +22,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="back"
+            android:padding="5dp"
             android:background="@null"
             android:textStyle="bold"
             android:id="@+id/prevMonth"
@@ -40,8 +41,8 @@
         <Button
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:onClick="DailyAction"
             android:text="next"
+            android:padding="5dp"
             android:layout_weight="1"
             android:background="@null"
             android:textStyle="bold"

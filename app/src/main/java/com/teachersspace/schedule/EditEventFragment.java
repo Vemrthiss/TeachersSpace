@@ -134,7 +134,7 @@ public class EditEventFragment extends Fragment {
     public void DeleteEventAction() {
 
         int index_event = -1;
-        String dontHave = "There is no existing event in this timeslot to delete.";
+        String dontHave = "No event here to delete.";
         for (int i = 0; i < Event.eventsList.size(); i++){
             if (time.equals(Event.eventsList.get(i).getTime())
                     && CalendarUtils.selectedDate.equals(Event.eventsList.get(i).getDate())){
@@ -145,18 +145,24 @@ public class EditEventFragment extends Fragment {
 
         if (index_event != -1){
 
-            Event.eventsList.remove(index_event);
-            //updates firestore - change method
-            docRef.update("slots", FieldValue.arrayRemove(Event.UserTextList.get(index_event)));
-            NavHostFragment.findNavController(this).navigateUp();
+            //creates new UserTextList using the eventList we are trying to delete
+            //This is to pass it to firestore to delete the appropriate array
+            Event a = Event.eventsList.get(index_event);
+            HashMap<String, String> temp = hashMapCreator(a.getName(), a.getDate().toString(), a.getTime().toString(), a.getTeacher_id(),
+                    String.valueOf(a.getBookingStatus()), a.getStudent_id());
 
+            //removes event in eventsList
+            Event.eventsList.remove(index_event);
+
+            //updates firestore - change method
+            docRef.update("slots", FieldValue.arrayRemove(temp));
+            NavHostFragment.findNavController(this).navigateUp();
         }
 
         else{
-            Toast.makeText(getContext(), "No event here to delete.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), dontHave, Toast.LENGTH_SHORT).show();
             deleteButton.setTextColor(Color.LTGRAY);
         }
-
     }
 
 
