@@ -26,6 +26,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
@@ -86,11 +87,9 @@ public class ScheduleFragment extends Fragment implements CalendarAdapter.OnItem
         monthYearText = view.findViewById(R.id.monthYearTV);
         nextButton = view.findViewById(R.id.nextMonth);
         prevButton = view.findViewById(R.id.prevMonth);
-        //dailyButton = view.findViewById(R.id.dailyButton);
 
         nextButton.setOnClickListener(nextMonthAction());
         prevButton.setOnClickListener(previousMonthAction());
-        //dailyButton.setOnClickListener(dailyAction());
 
     }
 
@@ -101,21 +100,21 @@ public class ScheduleFragment extends Fragment implements CalendarAdapter.OnItem
                 if (task.isSuccessful()){
                     DocumentSnapshot document = task.getResult();
                     if (document.exists()) {
-                        Map<String, Object> map = document.getData();
-                        if (map.size() == 0) {
-                            HashMap<String, List> slotObject = new HashMap<String, List>();
-                            slotObject.put("slots", new ArrayList());
-                            //uploads onto firestore
-                            db.collection("profschedule").document(String.valueOf(getUserUid())).set(slotObject)
-                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                        @Override
-                                        public void onSuccess(Void unused) {
-                                            Log.d("", "DocumentSnapshot successfully initialised!");
-                                        }
-                                    });
-                        }
+                        //do nothing
+                         }
+                        else {
+                        //creates new array to be pushed into firestore
+                        HashMap<String, List> slotObject = new HashMap<String, List>();
+                        slotObject.put("slots", new ArrayList());
+                        //uploads onto firestore
+                        db.collection("profschedule").document(String.valueOf(getUserUid())).set(slotObject)
+                                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                    @Override
+                                    public void onSuccess(Void unused) {
+                                        Log.d("", "DocumentSnapshot successfully initialised!");
+                                    }
+                                });
                     }
-
                 }
             }
         });
@@ -150,24 +149,5 @@ public class ScheduleFragment extends Fragment implements CalendarAdapter.OnItem
         };
     }
 
-//    //removing for now: might be buggy
-
-//    public View.OnClickListener dailyAction() {
-//        return view -> {
-//            NavDirections directions = new NavDirections() {
-//                @NonNull
-//                @Override
-//                public Bundle getArguments() {
-//                    return new Bundle();
-//                }
-//
-//                @Override
-//                public int getActionId() {
-//                    return R.id.navigate_daily_schedule_action;
-//                }
-//            };
-//            NavHostFragment.findNavController(ScheduleFragment.this).navigate(directions);
-//        };
-//    }
 
 }

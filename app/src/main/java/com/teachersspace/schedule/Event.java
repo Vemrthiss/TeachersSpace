@@ -109,4 +109,14 @@ public class Event
     {
         return isBooked;
     }
+
+    public String getTeacher_id()
+    {
+        return teacher_id;
+    }
+
+    public String getStudent_id()
+    {
+        return student_id;
+    }
 }
