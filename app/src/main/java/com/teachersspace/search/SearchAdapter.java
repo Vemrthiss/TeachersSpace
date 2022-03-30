@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
@@ -29,15 +30,21 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
      */
     public static class ViewHolder extends RecyclerView.ViewHolder {
         private final Button buttonView;
+        private final TextView textView;
 
         public ViewHolder(View view) {
             super(view);
             // Define click listener for the ViewHolder's View
             buttonView = view.findViewById(R.id.contactItemButton);
+            textView = view.findViewById(R.id.contactNoResults);
         }
 
         public Button getButtonView() {
             return buttonView;
+        }
+
+        public TextView getTextView() {
+            return textView;
         }
     }
 
@@ -78,10 +85,20 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
         // Get element from your dataset at this position and replace the
         // contents of the view with that element
 
+
         Button singleContactButton = holder.getButtonView();
+        TextView noResultsText = holder.getTextView();
         User user = resultList.get(position);
-        singleContactButton.setText(user.getName());
-        singleContactButton.setOnClickListener(searchFragment.searchIndividualListenerFactory(position));
+        if (position == 0 && user.getUid().equals("000") && user.getName().equals("noResults")) {
+            singleContactButton.setVisibility(View.GONE);
+            noResultsText.setVisibility(View.VISIBLE);
+        } else {
+            noResultsText.setVisibility(View.GONE);
+            singleContactButton.setVisibility(View.VISIBLE);
+            singleContactButton.setText(user.getName());
+            singleContactButton.setOnClickListener(searchFragment.searchIndividualListenerFactory(position));
+        }
+
     }
     /**
      * @return the size of dataset (invoked by the layout manager)
@@ -126,7 +143,8 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
             }
             Log.d(TAG, String.format("Added matches: %s", matches));
             resultList.clear();
-            resultList.addAll(matches);
+            if(matches.size() != 0) resultList.addAll(matches);
+            else resultList.add(new User("000", "noResults", "", User.UserType.TEACHER));
 
             Log.i(TAG, "Filtered by query");
         }
