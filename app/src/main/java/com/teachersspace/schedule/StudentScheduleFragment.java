@@ -36,6 +36,7 @@ import java.util.concurrent.Executors;
 
 public class StudentScheduleFragment extends Fragment implements View.OnClickListener {
     private static final String TAG = "StudentScheduleFragment";
+    private View fragmentView;
 
     private ArrayList<TextView> alt;
     private ArrayList<Button> alb;
@@ -67,6 +68,7 @@ public class StudentScheduleFragment extends Fragment implements View.OnClickLis
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        fragmentView = view;
         //adding all textviews and buttons in arraylists
         alt= new ArrayList<>();
         alb= new ArrayList<>();
@@ -75,21 +77,21 @@ public class StudentScheduleFragment extends Fragment implements View.OnClickLis
         templ= new ArrayList<>();
         mainl= new ArrayList<>();
 
-        alb.add(view.findViewById(R.id.button0));
-        alb.add(view.findViewById(R.id.button1));
-        alb.add(view.findViewById(R.id.button2));
-        alb.add(view.findViewById(R.id.button3));
-        alb.add(view.findViewById(R.id.button4));
-        alb.add(view.findViewById(R.id.button5));
-        alb.add(view.findViewById(R.id.button6));
-        alb.add(view.findViewById(R.id.button7));
-        alb.add(view.findViewById(R.id.button8));
-        alb.add(view.findViewById(R.id.button9));
+        alb.add(fragmentView.findViewById(R.id.button0));
+        alb.add(fragmentView.findViewById(R.id.button1));
+        alb.add(fragmentView.findViewById(R.id.button2));
+        alb.add(fragmentView.findViewById(R.id.button3));
+        alb.add(fragmentView.findViewById(R.id.button4));
+        alb.add(fragmentView.findViewById(R.id.button5));
+        alb.add(fragmentView.findViewById(R.id.button6));
+        alb.add(fragmentView.findViewById(R.id.button7));
+        alb.add(fragmentView.findViewById(R.id.button8));
+        alb.add(fragmentView.findViewById(R.id.button9));
 
         db=FirebaseFirestore.getInstance();
 
         //getting LinearLayout variable
-        LinearLayout ll= view.findViewById(R.id.linearlayout);
+        LinearLayout ll= fragmentView.findViewById(R.id.linearlayout);
 
         //setting onclicklistener for all buttons in alb
         for (Button b:alb){
@@ -104,7 +106,7 @@ public class StudentScheduleFragment extends Fragment implements View.OnClickLis
                     DocumentSnapshot document = task.getResult();
                     if (document.exists()) {
                         templ= (ArrayList<Map>) document.get("slots");
-                        createbuttons(templ, view);
+                        createbuttons(templ, fragmentView);
                         Log.d(TAG, "Inital DocumentSnapshot data: " + document.getData());
                     } else {
                         Log.d(TAG, "No such document");
@@ -131,15 +133,12 @@ public class StudentScheduleFragment extends Fragment implements View.OnClickLis
                 builder.setTitle(Html.fromHtml("<font color='#0F232D'>Book Slot? </font>"));
                 builder.setMessage("Are you sure you want to book the slot you just selected? : ");
                 builder.setPositiveButton("Confirm",
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                TextView tv= view.findViewById(R.id.textview0);
-                                tvref0= tv.getText().toString();
-                                Log.d(TAG, tvref0);
-                                updateref(tvref0, view);
+                        (dialog, which) -> {
+                            TextView tv= fragmentView.findViewById(R.id.textview0);
+                            tvref0= tv.getText().toString();
+                            Log.d(TAG, tvref0);
+                            updateref(tvref0, fragmentView);
 
-                            }
                         });
                 builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
                     @Override
@@ -201,7 +200,7 @@ public class StudentScheduleFragment extends Fragment implements View.OnClickLis
         }
 
         if (main.length<=10){
-            TextView intro= view.findViewById(R.id.intro);
+            TextView intro= fragmentView.findViewById(R.id.intro);
             intro.setText("The following slots for Prof. X are available: ");
             for (int i=0; i<main.length; i++){
                 String dateandtime = main[i][0].toString() + main[i][1].toString();
