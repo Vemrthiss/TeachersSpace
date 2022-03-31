@@ -23,6 +23,11 @@ public class Message {
         return this.senderUID;
     }
 
+    private String receiverUID;
+    public String getReceiverUID(){
+        return this.receiverUID;
+    }
+
     private Date timeSent;
     public Date getTimeSent() {
         return this.timeSent;
@@ -32,6 +37,7 @@ public class Message {
         this.uid = UUID.randomUUID().toString();
         this.body = body;
         this.senderUID = senderUID;
+        //this.receiverUID = receiverUID;
         this.timeSent = timeSent;
     }
 
