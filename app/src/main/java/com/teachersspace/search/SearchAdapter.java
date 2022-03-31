@@ -42,7 +42,6 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
         public Button getButtonView() {
             return buttonView;
         }
-
         public TextView getTextView() {
             return textView;
         }
@@ -84,8 +83,6 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         // Get element from your dataset at this position and replace the
         // contents of the view with that element
-
-
         Button singleContactButton = holder.getButtonView();
         TextView noResultsText = holder.getTextView();
         User user = resultList.get(position);

@@ -40,5 +40,5 @@
     </string>
     <string name="attachment_summary_off">Only download attachments when manually requested</string>
     <string name="hint_display_name">New Display Name</string>
-    <string name="your_message">your_message</string>
+    <string name="your_message">Message</string>
 </resources>
