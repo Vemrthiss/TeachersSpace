@@ -22,6 +22,7 @@ import androidx.navigation.NavDirections;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
@@ -42,8 +43,8 @@ public class DailyScheduleFragment extends Fragment {
     private TextView monthDayText;
     private TextView dayOfWeekTV;
     private ListView hourListView;
-    private Button previousDay;
-    private Button nextDay;
+    private FloatingActionButton previousDay;
+    private FloatingActionButton nextDay;
     private SwipeRefreshLayout swipe;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private DocumentReference docRef = db.collection("profschedule").document(String.valueOf(getUserUid()));
