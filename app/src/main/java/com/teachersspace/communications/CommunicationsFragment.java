@@ -20,7 +20,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.Chronometer;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -38,6 +40,7 @@ import com.teachersspace.models.User;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 
 import com.teachersspace.data.MessageRepository;
 
@@ -64,11 +67,19 @@ public class CommunicationsFragment extends Fragment {
 
     private BottomNavigationView navbar;
 
+    //==== Messages ===//
+    private TextView staticMessage;
+    private EditText inputMessage;
+    private Button sendMessageButton;
+    private Message message;
+    private String senderUID;
+
     public interface CommunicationsFragmentProps {
         View.OnClickListener callActionFabClickListener();
         View.OnClickListener hangupActionFabClickListener();
         View.OnClickListener holdActionFabClickListener();
         View.OnClickListener muteActionFabClickListener();
+        //View.OnClickListener sendMessageButtonClickListener();
     }
     private CommunicationsFragmentProps props;
 
@@ -105,6 +116,9 @@ public class CommunicationsFragment extends Fragment {
         inactiveCallLayout = view.findViewById(R.id.communications_no_call_container);
         activeCallLayout = view.findViewById(R.id.communications_with_call_container);
         backActionFab = view.findViewById(R.id.back_action_fab);
+        staticMessage = view.findViewById(R.id.staticMessage);
+        inputMessage = view.findViewById(R.id.inputMessage);
+        //sendMessageButton = view.findViewById(R.id.sendMessageButton);
 
         // register click event listeners
         callActionFab.setOnClickListener(props.callActionFabClickListener());
@@ -112,6 +126,7 @@ public class CommunicationsFragment extends Fragment {
         holdActionFab.setOnClickListener(props.holdActionFabClickListener());
         muteActionFab.setOnClickListener(props.muteActionFabClickListener());
         backActionFab.setOnClickListener(goBack());
+        //sendMessageButton.setOnClickListener( new SendMessageButtonClickListener() );
 
         // setup the UI
         resetUI();
@@ -131,6 +146,7 @@ public class CommunicationsFragment extends Fragment {
             vm.watchActiveContact();
             vm.getIsOutsideOfficeHours().observe(getViewLifecycleOwner(), new ActiveContactOfficeHoursObserver());
             vm.getActiveContact().observe(getViewLifecycleOwner(), new ActiveContactObserver());
+            //sendMessageButton.setOnClickListener( new SendMessageButtonClickListener() );
 
             // Initialise MessageRepository instance
             messageRepository = new MessageRepository();
@@ -151,6 +167,29 @@ public class CommunicationsFragment extends Fragment {
                     LogMessages(messages);
                 }
             });
+
+
+            // send messages
+
+//            class SendMessageButtonClickListener implements View.OnClickListener {
+//                @Override
+//                public void onClick(View view){
+//                    //for user UID
+//                    if (user.getUserType() == User.UserType.TEACHER) {
+//                        senderUID = user.getUid();
+//                    } else {
+//                        senderUID = activeContact.getUid();
+//                    }
+//                    //for message body
+//                    String message_string = inputMessage.getText().toString();
+//                    // for date/time
+//                    Date timeSent = new Date();
+//
+//                    //instantiation and posting
+//                    message = new Message(message_string, senderUID, timeSent);
+//                    messageRepository.postMessage(message);
+//                }
+//            }
 
             boolean externalAccept = args.getBoolean("externalAccept");
             if (externalAccept) {
@@ -296,4 +335,5 @@ public class CommunicationsFragment extends Fragment {
             navbar.setVisibility(View.GONE);
         }
     }
+
 }

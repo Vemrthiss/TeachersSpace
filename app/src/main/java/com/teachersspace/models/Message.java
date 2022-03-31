@@ -33,11 +33,11 @@ public class Message {
         return this.timeSent;
     }
 
-    public Message(String body, String senderUID, String receiverUID, Date timeSent) {
+    public Message(String body, String senderUID, Date timeSent) {
         this.uid = UUID.randomUUID().toString();
         this.body = body;
         this.senderUID = senderUID;
-        this.receiverUID = receiverUID;
+        //this.receiverUID = receiverUID;
         this.timeSent = timeSent;
     }
 
