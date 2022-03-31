@@ -12,8 +12,6 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.NavDirections;
-import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -22,6 +20,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.Chronometer;
 import android.widget.EditText;
@@ -66,7 +65,7 @@ public class CommunicationsFragment extends Fragment {
     private BottomNavigationView navbar;
 
     //==== Messages ===//
-    private TextView staticMessage;
+    private RecyclerView messageRecyclerView;
     private EditText inputMessage;
     private Button sendMessageButton;
     private Message message;
@@ -110,7 +109,7 @@ public class CommunicationsFragment extends Fragment {
         // setup communications view model
         vm = new ViewModelProvider(requireActivity()).get(CommunicationsViewModel.class);
         // setup recyclerview
-        RecyclerView messageRecyclerView = view.findViewById(R.id.messageList);
+        messageRecyclerView = view.findViewById(R.id.messageList);
         messageRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         messageAdapter = new MessageAdapter(senderUID, messages, this);
         messageRecyclerView.setAdapter(messageAdapter);
@@ -127,7 +126,6 @@ public class CommunicationsFragment extends Fragment {
         inactiveCallLayout = view.findViewById(R.id.communications_no_call_container);
         activeCallLayout = view.findViewById(R.id.communications_with_call_container);
         backActionFab = view.findViewById(R.id.back_action_fab);
-        staticMessage = view.findViewById(R.id.staticMessage);
         inputMessage = view.findViewById(R.id.inputMessage);
         sendMessageButton = view.findViewById(R.id.sendMessageButton);
 
@@ -204,8 +202,6 @@ public class CommunicationsFragment extends Fragment {
         messageAdapter.updateLocalData(newMessages);
     }
 
-
-
     /*
      * The UI state when there is an active call
      */
@@ -220,6 +216,10 @@ public class CommunicationsFragment extends Fragment {
         chronometer.setVisibility(View.VISIBLE);
         chronometer.setBase(SystemClock.elapsedRealtime());
         chronometer.start();
+        messageRecyclerView.setVisibility(View.INVISIBLE);
+        inputMessage.setVisibility(View.INVISIBLE);
+        hideKeyboard();
+        sendMessageButton.setVisibility(View.INVISIBLE);
     }
 
     /*
@@ -240,6 +240,9 @@ public class CommunicationsFragment extends Fragment {
         hangupActionFab.hide();
         chronometer.setVisibility(View.INVISIBLE);
         chronometer.stop();
+        messageRecyclerView.setVisibility(View.VISIBLE);
+        inputMessage.setVisibility(View.VISIBLE);
+        sendMessageButton.setVisibility(View.VISIBLE);
     }
 
     public void applyFabState(String buttonWhich, boolean enabled) {
@@ -263,20 +266,25 @@ public class CommunicationsFragment extends Fragment {
 
     private View.OnClickListener goBack() {
         return view -> {
-            NavDirections directions = new NavDirections() {
-                @NonNull
-                @Override
-                public Bundle getArguments() {
-                    return new Bundle();
-                }
+            requireActivity().onBackPressed();
 
-                @Override
-                public int getActionId() {
-                    return R.id.navigate_back_contacts_action;
-                }
-            };
-            NavHostFragment.findNavController(CommunicationsFragment.this).navigate(directions);
-            toggleNavbar(true);
+            // the below is commented out as closing the keyboard reliably requires the back button press
+
+//            hideKeyboard();
+//            NavDirections directions = new NavDirections() {
+//                @NonNull
+//                @Override
+//                public Bundle getArguments() {
+//                    return new Bundle();
+//                }
+//
+//                @Override
+//                public int getActionId() {
+//                    return R.id.navigate_back_contacts_action;
+//                }
+//            };
+//            NavHostFragment.findNavController(CommunicationsFragment.this).navigate(directions);
+            // toggleNavbar(true);
         };
     }
 
@@ -339,4 +347,16 @@ public class CommunicationsFragment extends Fragment {
         }
     }
 
+    private void hideKeyboard() {
+        // this does not work for the back button, but works for setting call UI
+        if (inputMessage != null) {
+            inputMessage.clearFocus();
+            Context ctx = getContext();
+            if (ctx != null) {
+                // shows keyboard
+                InputMethodManager imm = (InputMethodManager) ctx.getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(inputMessage.getWindowToken(), 0);
+            }
+        }
+    }
 }

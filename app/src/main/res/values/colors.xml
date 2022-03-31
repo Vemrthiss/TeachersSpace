@@ -15,4 +15,5 @@
     <color name="light_beige">#FFFAEA</color>
     <color name="brown_200">#CFA586</color>
     <color name="brown_500">#B38B6D</color>
+    <color name="dark_grey">#595959</color>
 </resources>

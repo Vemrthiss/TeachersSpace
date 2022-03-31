@@ -90,6 +90,15 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/messageList"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:padding="16dp"
+            app:layout_constraintBottom_toTopOf="@+id/communications_with_message_container" />
+
+
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/constraintLayout"
             android:layout_width="match_parent"
@@ -164,90 +173,61 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
+<!--        <LinearLayout-->
+<!--            android:id="@+id/linearLayout"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_marginStart="8dp"-->
+<!--            android:layout_marginEnd="8dp"-->
+<!--            android:layout_marginBottom="16dp"-->
+<!--            android:orientation="vertical"-->
+<!--            app:layout_constraintBottom_toTopOf="@+id/communications_with_message_container"-->
+<!--            tools:layout_editor_absoluteX="20dp">-->
+
+<!--            <androidx.recyclerview.widget.RecyclerView-->
+<!--                android:id="@+id/messageList"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_marginStart="@dimen/activity_horizontal_margin"-->
+<!--                android:layout_marginTop="16dp"-->
+<!--                android:layout_marginEnd="@dimen/activity_horizontal_margin"-->
+<!--                app:layout_constraintEnd_toEndOf="parent"-->
+<!--                app:layout_constraintStart_toStartOf="parent" />-->
+<!--        </LinearLayout>-->
+
         <LinearLayout
-            android:id="@+id/message_scroll_up"
+            android:id="@+id/communications_with_message_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentBottom="true"
-            android:orientation="vertical"
+            android:orientation="horizontal"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/constraintLayout">
+            android:layout_marginBottom="8dp"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp">
 
-            <LinearLayout
-                android:layout_width="match_parent"
+            <EditText
+                android:id="@+id/inputMessage"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_margin="20dp"
-                android:orientation="vertical">
+                android:layout_marginEnd="16dp"
+                android:layout_weight="9"
+                android:textSize="14sp"
+                android:background="@drawable/rounded_edit_text"
+                android:ems="10"
+                android:hint="@string/your_message"
+                android:inputType="textLongMessage"
+                android:padding="8dp"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp">
 
-                <ScrollView
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1">
+            </EditText>
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:id="@+id/staticMessage"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:layout_gravity="right"
-                            android:layout_weight="1"
-                            android:outlineAmbientShadowColor="@color/beige"
-                            android:padding="20dp"
-                            android:textColor="@color/brown_200"
-                            android:textFontWeight="@integer/material_motion_duration_medium_2" />
-                    </LinearLayout>
-                </ScrollView>
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/messageList"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/activity_horizontal_margin"
-                    android:layout_marginTop="16dp"
-                    android:layout_marginEnd="@dimen/activity_horizontal_margin"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/search_bar" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/communications_with_message_container"
-                android:layout_width="match_parent"
+            <Button
+                android:id="@+id/sendMessageButton"
+                android:layout_width="16dp"
+                android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:layout_margin="20dp"
-                android:orientation="horizontal">
-
-                <EditText
-                    android:id="@+id/inputMessage"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_marginRight="20dp"
-                    android:layout_weight="7"
-                    android:background="@color/beige"
-                    android:ems="10"
-                    android:hint="@string/your_message"
-                    android:inputType="textLongMessage"
-                    android:paddingStart="8dp"
-                    android:paddingEnd="8dp">
-
-                    <requestFocus />
-
-                </EditText>
-
-                <Button
-                    android:id="@+id/sendMessageButton"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="0.7"
-                    android:background="@drawable/ic_baseline_send_24" />
-
-            </LinearLayout>
+                android:background="@drawable/ic_send_24"/>
 
         </LinearLayout>
 
