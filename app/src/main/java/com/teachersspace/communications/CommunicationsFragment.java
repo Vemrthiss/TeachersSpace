@@ -70,6 +70,7 @@ public class CommunicationsFragment extends Fragment {
     private Button sendMessageButton;
     private Message message;
     private String senderUID;
+    private boolean messageRecyclerViewFirstRender = true;
 
     private ArrayList<Message> messages;
 
@@ -195,11 +196,17 @@ public class CommunicationsFragment extends Fragment {
     }
 
     // For testing subscriber function
-    public void LogMessages(ArrayList<Message> newMessages){
-        for(Message message : newMessages){
-            Log.d(TAG, message.getBody());
-        }
+    public void LogMessages(ArrayList<Message> newMessages) {
         messageAdapter.updateLocalData(newMessages);
+        if (messageRecyclerViewFirstRender) {
+            scrollToLastMessage();
+            messageRecyclerViewFirstRender = false;
+        } else {
+            boolean lastMessageSentFromSelf = newMessages.get(newMessages.size() - 1).getSenderUID().equals(senderUID);
+            if (lastMessageSentFromSelf) {
+                scrollToLastMessage();
+            }
+        }
     }
 
     /*
@@ -357,6 +364,16 @@ public class CommunicationsFragment extends Fragment {
                 InputMethodManager imm = (InputMethodManager) ctx.getSystemService(Context.INPUT_METHOD_SERVICE);
                 imm.hideSoftInputFromWindow(inputMessage.getWindowToken(), 0);
             }
+        }
+    }
+
+    private void scrollToLastMessage() {
+        if (messageRecyclerView != null && messageRecyclerView.getAdapter() != null) {
+            int itemCount = messageRecyclerView.getAdapter().getItemCount();
+            if (itemCount == 0) {
+                return;
+            }
+            messageRecyclerView.smoothScrollToPosition(messageRecyclerView.getAdapter().getItemCount() - 1);
         }
     }
 }
