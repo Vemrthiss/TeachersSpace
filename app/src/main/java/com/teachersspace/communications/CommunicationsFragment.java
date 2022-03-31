@@ -14,21 +14,22 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavDirections;
 import androidx.navigation.fragment.NavHostFragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.SystemClock;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.Chronometer;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
-import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.teachersspace.R;
 import com.teachersspace.auth.SessionManager;
 import com.teachersspace.helpers.TimeFormatter;
@@ -41,13 +42,13 @@ import java.util.Date;
 
 import com.teachersspace.data.MessageRepository;
 
-
 public class CommunicationsFragment extends Fragment {
     private static final String TAG = "CommunicationsFragment";
 
     private MessageRepository messageRepository;
 
     private CommunicationsViewModel vm;
+    private MessageAdapter messageAdapter;
 
     private FloatingActionButton callActionFab;
     private FloatingActionButton hangupActionFab;
@@ -64,17 +65,28 @@ public class CommunicationsFragment extends Fragment {
 
     private BottomNavigationView navbar;
 
+    //==== Messages ===//
+    private TextView staticMessage;
+    private EditText inputMessage;
+    private Button sendMessageButton;
+    private Message message;
+    private String senderUID;
+
+    private ArrayList<Message> messages;
+
     public interface CommunicationsFragmentProps {
         View.OnClickListener callActionFabClickListener();
         View.OnClickListener hangupActionFabClickListener();
         View.OnClickListener holdActionFabClickListener();
         View.OnClickListener muteActionFabClickListener();
+        //View.OnClickListener sendMessageButtonClickListener();
     }
     private CommunicationsFragmentProps props;
 
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
+
         props = (CommunicationsFragmentProps) context;
     }
 
@@ -90,8 +102,18 @@ public class CommunicationsFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        // Get current user
+        User user = new SessionManager(getContext()).getCurrentUser();
+        senderUID = user.getUid();
+        if (messages == null) messages = new ArrayList<>();
+
         // setup communications view model
         vm = new ViewModelProvider(requireActivity()).get(CommunicationsViewModel.class);
+        // setup recyclerview
+        RecyclerView messageRecyclerView = view.findViewById(R.id.messageList);
+        messageRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        messageAdapter = new MessageAdapter(senderUID, messages, this);
+        messageRecyclerView.setAdapter(messageAdapter);
 
         callActionFab = view.findViewById(R.id.call_action_fab);
         hangupActionFab = view.findViewById(R.id.hangup_action_fab);
@@ -105,6 +127,9 @@ public class CommunicationsFragment extends Fragment {
         inactiveCallLayout = view.findViewById(R.id.communications_no_call_container);
         activeCallLayout = view.findViewById(R.id.communications_with_call_container);
         backActionFab = view.findViewById(R.id.back_action_fab);
+        staticMessage = view.findViewById(R.id.staticMessage);
+        inputMessage = view.findViewById(R.id.inputMessage);
+        sendMessageButton = view.findViewById(R.id.sendMessageButton);
 
         // register click event listeners
         callActionFab.setOnClickListener(props.callActionFabClickListener());
@@ -115,9 +140,6 @@ public class CommunicationsFragment extends Fragment {
 
         // setup the UI
         resetUI();
-
-        // Get current user
-        User user = new SessionManager(getContext()).getCurrentUser();
 
         // get contact uid
         Bundle args = getArguments();
@@ -140,17 +162,32 @@ public class CommunicationsFragment extends Fragment {
             else{
                 messageRepository.setChatUID(activeContact.getUid() + "-" + user.getUid());
             }
-
-            messageRepository.subscribeToMessageUpdates(new EventListener<QuerySnapshot>() {
-                @Override
-                public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
-                    ArrayList<Message> messages = new ArrayList<Message>();
+            messageRepository.subscribeToMessageUpdates((value, error) -> {
+                ArrayList<Message> messages = new ArrayList<>();
+                if (value != null) {
                     for (DocumentSnapshot doc : value) {
                         messages.add(doc.toObject(Message.class));
                     }
-                    LogMessages(messages);
                 }
+                LogMessages(messages);
             });
+
+            // send messages
+            class SendMessageButtonClickListener implements View.OnClickListener {
+                @Override
+                public void onClick(View view){
+                    //for message body
+                    String message_string = inputMessage.getText().toString();
+                    // for date/time
+                    Date timeSent = new Date();
+                    inputMessage.setText("");
+
+                    //instantiation and posting
+                    message = new Message(message_string, senderUID, timeSent);
+                    messageRepository.postMessage(message);
+                }
+            }
+            sendMessageButton.setOnClickListener( new SendMessageButtonClickListener() );
 
             boolean externalAccept = args.getBoolean("externalAccept");
             if (externalAccept) {
@@ -160,11 +197,14 @@ public class CommunicationsFragment extends Fragment {
     }
 
     // For testing subscriber function
-    public void LogMessages(ArrayList<Message> messages){
-        for(Message message : messages){
+    public void LogMessages(ArrayList<Message> newMessages){
+        for(Message message : newMessages){
             Log.d(TAG, message.getBody());
         }
+        messageAdapter.updateLocalData(newMessages);
     }
+
+
 
     /*
      * The UI state when there is an active call
@@ -298,4 +338,5 @@ public class CommunicationsFragment extends Fragment {
             navbar.setVisibility(View.GONE);
         }
     }
+
 }
