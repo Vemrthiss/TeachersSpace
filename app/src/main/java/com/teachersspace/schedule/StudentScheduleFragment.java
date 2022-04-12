@@ -28,12 +28,17 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.type.DateTime;
 import com.teachersspace.R;
 import com.teachersspace.auth.SessionManager;
 import com.teachersspace.models.User;
 
 import java.text.ParseException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
@@ -358,9 +363,12 @@ public class StudentScheduleFragment extends Fragment implements View.OnClickLis
                 bookedslots=addo(main, temp);
             }
         }
+        Log.d(TAG, main.toString());
+        arraysort(main);
+        Log.d(TAG, main.toString());
 
         /*updating UI*/
-        if (main.length>0){
+        if (main.length<=10){
             for (int i=0; i<main.length; i++){
                 String tempdnt = main[i][0].toString() + " " + main[i][1].toString();
                 String dateandtime= converttoMM(tempdnt);
@@ -378,8 +386,21 @@ public class StudentScheduleFragment extends Fragment implements View.OnClickLis
             }
         }
         else{
-            ;
+            for (int i=0; i<10; i++){
+                String tempdnt = main[i][0].toString() + " " + main[i][1].toString();
+                String dateandtime= converttoMM(tempdnt);
+                String gettv= "textview"+String.valueOf(i);
+                String getll= "hlinearlo"+String.valueOf(i);
+                String packageName = getContext().getPackageName();
+                int tvID = getResources().getIdentifier(gettv, "id", packageName);
+                int llID = getResources().getIdentifier(getll, "id", packageName);
+
+                LinearLayout hlo= view.findViewById(llID);
+                hlo.setVisibility(hlo.VISIBLE);
+                TextView temptv= view.findViewById(tvID);
+                temptv.setText(dateandtime);
             }
+        }
 
     }
 
@@ -617,5 +638,32 @@ public class StudentScheduleFragment extends Fragment implements View.OnClickLis
         TextView heading=fragmentView.findViewById(R.id.headingwprof);
         heading.setText("Schedule a Meeting With "+s+ " BELOW: " );
     }
+
+    /*sort array based on date and time*/
+    public void arraysort(Object[][] array){
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm");//current format
+        Arrays.sort(array, new Comparator<Object[]>() {
+            @Override
+            public int compare(Object[] o1, Object[] o2) {
+                String val1= o1[0].toString() + " "+ o1[1].toString();
+                String val2= o2[0].toString() + " "+ o2[1].toString();
+
+                try {
+
+                    /*using sdf*/
+                    return format.parse(val1).compareTo(format.parse(val2));
+
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                    return 0;
+                }
+
+
+                
+
+            }
+        });
+    }
+
 
 }
