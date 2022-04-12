@@ -14,7 +14,12 @@ exports.sendMessageNotification = functions
                                     .firestore
                                     .document('chats/{chatId}/messages/{messageId}')
                                     .onCreate(async (snapshot, context) => {
-                                        const { receiverUID: toUid, senderUID: fromUid, body } = snapshot.data();
+                                        const { chatId } = context.params;
+                                        const chatUsers = chatId.split('-');
+                                        
+                                        const { senderUID: fromUid, body } = snapshot.data();
+
+                                        const toUid = chatUsers.find(el => el !== fromUid);
                                         if (fromUid && toUid) {
                                             functions.logger.log({fromUid, toUid, body});
                                         }
