@@ -361,8 +361,6 @@ public class StudentScheduleFragment extends Fragment implements View.OnClickLis
 
         /*updating UI*/
         if (main.length>0){
-            TextView intro= fragmentView.findViewById(R.id.intro);
-            intro.setText("The following slots for Prof. X are available: ");
             for (int i=0; i<main.length; i++){
                 String tempdnt = main[i][0].toString() + " " + main[i][1].toString();
                 String dateandtime= converttoMM(tempdnt);
@@ -380,9 +378,7 @@ public class StudentScheduleFragment extends Fragment implements View.OnClickLis
             }
         }
         else{
-            TextView intro= fragmentView.findViewById(R.id.intro);
-            intro.setText("There are currently no slots available, sorry! ");
-
+            ;
             }
 
     }
@@ -509,6 +505,7 @@ public class StudentScheduleFragment extends Fragment implements View.OnClickLis
 
     /*getting the docref and updating UI through the createbuttons method called*/
     public void getdocref(View view, DocumentReference docRef){
+
         for (int i=0; i<10; i++){
             String gettv= "textview"+String.valueOf(i);
             String getll= "hlinearlo"+String.valueOf(i);
@@ -520,6 +517,29 @@ public class StudentScheduleFragment extends Fragment implements View.OnClickLis
             hlo.setVisibility(hlo.INVISIBLE);
 
         }
+
+        /*set prof name in total*/
+        Bundle args= getArguments();
+        if (args != null) {
+            Log.d(TAG, "Student Schedule Args");
+            User activeTeacher = User.deserialise(args.getString("contact"));
+            String userid = activeTeacher.getUid();
+            DocumentReference docRefprof = db.collection("users").document(userid);
+            docRefprof.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                    if (task.getResult().exists()){
+                        String name= task.getResult().getString("name");
+                        setheading(name);
+                    }
+                    else{
+                        Log.d(TAG, "getting name didn't work");
+                    }
+                }
+            });
+
+        }
+
         docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
@@ -593,24 +613,9 @@ public class StudentScheduleFragment extends Fragment implements View.OnClickLis
         }
     }
 
-    public String getstudentname(View view){
-        this.sessionManager = new SessionManager(getContext());
-        String studentuserid= this.sessionManager.getCurrentUser().getUid();
-        DocumentReference docRef= db.collection("users").document(studentuserid);
-        String name = null;
-
-        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                if (task.getResult().exists()){
-                    String name= task.getResult().getString("name");
-                }
-                else{
-                    Log.d(TAG, "getting name didn't work");
-                }
-            }
-        });
-        return name;
+    public void setheading(String s){
+        TextView heading=fragmentView.findViewById(R.id.headingwprof);
+        heading.setText("Schedule a Meeting With "+s+ " BELOW: " );
     }
 
 }
