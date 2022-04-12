@@ -52,6 +52,8 @@ dependencies {
     implementation 'com.google.firebase:firebase-firestore'
     implementation 'com.firebaseui:firebase-ui-auth:7.2.0'
     implementation 'com.google.firebase:firebase-messaging'
+    implementation 'com.google.firebase:firebase-core:16.0.1'
+    implementation 'com.firebaseui:firebase-ui-firestore:8.0.1'
 
     // ----------- NAVIGATION -------------
     def nav_version = "2.4.1"

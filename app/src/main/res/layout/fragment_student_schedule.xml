@@ -40,16 +40,6 @@
             android:id="@+id/linearlayout"
             android:orientation="vertical">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/intro"
-                android:textColor="@color/beige"
-                android:textSize="15sp"
-                android:text="There are currently no slots available~"
-                android:textStyle="italic"
-                android:layout_margin="5sp"
-                />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -257,6 +247,7 @@
 
                 </LinearLayout>
 
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -399,12 +390,12 @@
 
 
 
-    <View
-        android:layout_height="1dp"
-        android:layout_width="300dp"
-        android:layout_gravity="center"
-        android:background="@color/beige"
-        />
+<!--    <View-->
+<!--        android:layout_height="1dp"-->
+<!--        android:layout_width="300dp"-->
+<!--        android:layout_gravity="center"-->
+<!--        android:background="@color/beige"-->
+<!--        />-->
 
 <!--    <ImageView-->
 <!--        android:layout_width="match_parent"-->
