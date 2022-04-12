@@ -257,6 +257,7 @@
 
                 </LinearLayout>
 
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -399,12 +400,12 @@
 
 
 
-    <View
-        android:layout_height="1dp"
-        android:layout_width="300dp"
-        android:layout_gravity="center"
-        android:background="@color/beige"
-        />
+<!--    <View-->
+<!--        android:layout_height="1dp"-->
+<!--        android:layout_width="300dp"-->
+<!--        android:layout_gravity="center"-->
+<!--        android:background="@color/beige"-->
+<!--        />-->
 
 <!--    <ImageView-->
 <!--        android:layout_width="match_parent"-->

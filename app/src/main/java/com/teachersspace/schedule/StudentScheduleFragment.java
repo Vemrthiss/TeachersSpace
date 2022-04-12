@@ -1,10 +1,12 @@
 package com.teachersspace.schedule;
 
 import android.content.DialogInterface;
+import android.icu.text.SimpleDateFormat;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.Html;
+import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,6 +20,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -26,10 +29,14 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.teachersspace.R;
+import com.teachersspace.auth.SessionManager;
 import com.teachersspace.models.User;
 
+import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -37,25 +44,10 @@ import java.util.concurrent.Executors;
 public class StudentScheduleFragment extends Fragment implements View.OnClickListener {
     private static final String TAG = "StudentScheduleFragment";
     private View fragmentView;
+    private SessionManager sessionManager;
 
-    private ArrayList<TextView> alt;
-    private ArrayList<Button> alb;
-    private ArrayList<String> bsa;
-    private ArrayList<String> list;
-    private ListView lv;
-    private static ArrayList templ;
-    private static ArrayList mainl;
-
-    String tvref0= "";
-    String tvref1= "";
-    String tvref2= "";
-    String tvref3= "";
-    String tvref4= "";
-    String tvref5= "";
-    String tvref6= "";
-    String tvref7= "";
-    String tvref8= "";
-    String tvref9= "";
+    private ArrayList<Button> alb; //array to store all buttons
+    private static ArrayList templ; //array to temporarily store the docsnapshot array
 
     private FirebaseFirestore db;
 
@@ -67,16 +59,11 @@ public class StudentScheduleFragment extends Fragment implements View.OnClickLis
 
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
         fragmentView = view;
-        //adding all textviews and buttons in arraylists
-        alt= new ArrayList<>();
         alb= new ArrayList<>();
-        bsa= new ArrayList<>();
-        list= new ArrayList<>();
         templ= new ArrayList<>();
-        mainl= new ArrayList<>();
 
+        /*adding all book buttons to the button array*/
         alb.add(fragmentView.findViewById(R.id.button0));
         alb.add(fragmentView.findViewById(R.id.button1));
         alb.add(fragmentView.findViewById(R.id.button2));
@@ -88,98 +75,266 @@ public class StudentScheduleFragment extends Fragment implements View.OnClickLis
         alb.add(fragmentView.findViewById(R.id.button8));
         alb.add(fragmentView.findViewById(R.id.button9));
 
-        db=FirebaseFirestore.getInstance();
 
-        //getting LinearLayout variable
+        /*all parent variables*/
+        db=FirebaseFirestore.getInstance();
         LinearLayout ll= fragmentView.findViewById(R.id.linearlayout);
 
-        //setting onclicklistener for all buttons in alb
         for (Button b:alb){
             b.setOnClickListener(this);
         }
 
-        DocumentReference docRef = db.collection("profschedule").document("dqpqTSphxfS4xy0B2R5NeHv638D2");
-        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                if (task.isSuccessful()) {
-                    DocumentSnapshot document = task.getResult();
-                    if (document.exists()) {
-                        templ= (ArrayList<Map>) document.get("slots");
-                        createbuttons(templ, fragmentView);
-                        Log.d(TAG, "Inital DocumentSnapshot data: " + document.getData());
-                    } else {
-                        Log.d(TAG, "No such document");
-                    }
-                } else {
-                    Log.d(TAG, "get failed with ", task.getException());
-                }
-            }
-        });
+        /*getting document reference for the first time*/
 
-        Bundle args = getArguments();
-        if (args != null) {
-            Log.d(TAG, "Student Schedule Args");
-            User activeTeacher = User.deserialise(args.getString("contact"));
-        }
+        DocumentReference docRef= getcurrentdocref(view);
+        getcurrentdocref(view);
     }
-    //all on clicks
+
+    /*setting on clicks for all the buttons*/
     @Override
     public void onClick(View view) {
         switch (view.getId()){
             case R.id.button0:
-                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                builder.setCancelable(true);
-                builder.setTitle(Html.fromHtml("<font color='#0F232D'>Book Slot? </font>"));
-                builder.setMessage("Are you sure you want to book the slot you just selected? : ");
-                builder.setPositiveButton("Confirm",
+                AlertDialog.Builder builder0 = new AlertDialog.Builder(getContext());
+                builder0.setCancelable(true);
+                builder0.setTitle(Html.fromHtml("<font color='#0F232D'>Book Slot? </font>"));
+                builder0.setMessage("Are you sure you want to book the slot you just selected? : ");
+                builder0.setPositiveButton("Confirm",
                         (dialog, which) -> {
                             TextView tv= fragmentView.findViewById(R.id.textview0);
-                            tvref0= tv.getText().toString();
-                            Log.d(TAG, tvref0);
-                            updateref(tvref0, fragmentView);
-
+                            String tvreftemp= tv.getText().toString();
+                            String tvref= convertdateback(tvreftemp);
+                            Log.d(TAG, tvref);
+                            updateref(tvref, fragmentView);
                         });
-                builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                builder0.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                     }
                 });
 
-                AlertDialog dialog = builder.create();
+                AlertDialog dialog = builder0.create();
                 dialog.show();
                 dialog.getWindow().setBackgroundDrawableResource(R.color.beige);
                 break;
             case R.id.button1:
+                AlertDialog.Builder builder1 = new AlertDialog.Builder(getContext());
+                builder1.setCancelable(true);
+                builder1.setTitle(Html.fromHtml("<font color='#0F232D'>Book Slot? </font>"));
+                builder1.setMessage("Are you sure you want to book the slot you just selected? : ");
+                builder1.setPositiveButton("Confirm",
+                        (dialog1, which) -> {
+                            TextView tv= fragmentView.findViewById(R.id.textview1);
+                            String tvreftemp= tv.getText().toString();
+                            String tvref= convertdateback(tvreftemp);
+                            Log.d(TAG, tvref);
+                            updateref(tvref, fragmentView);
+                        });
+                builder1.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                });
+
+                AlertDialog dialog1 = builder1.create();
+                dialog1.show();
+                dialog1.getWindow().setBackgroundDrawableResource(R.color.beige);
                 break;
             case R.id.button2:
+                AlertDialog.Builder builder2 = new AlertDialog.Builder(getContext());
+                builder2.setCancelable(true);
+                builder2.setTitle(Html.fromHtml("<font color='#0F232D'>Book Slot? </font>"));
+                builder2.setMessage("Are you sure you want to book the slot you just selected? : ");
+                builder2.setPositiveButton("Confirm",
+                        (dialog2, which) -> {
+                            TextView tv= fragmentView.findViewById(R.id.textview2);
+                            String tvreftemp= tv.getText().toString();
+                            String tvref= convertdateback(tvreftemp);
+                            Log.d(TAG, tvref);
+                            updateref(tvref, fragmentView);
+                        });
+                builder2.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                });
+
+                AlertDialog dialog2 = builder2.create();
+                dialog2.show();
+                dialog2.getWindow().setBackgroundDrawableResource(R.color.beige);
                 break;
             case R.id.button3:
+                AlertDialog.Builder builder3 = new AlertDialog.Builder(getContext());
+                builder3.setCancelable(true);
+                builder3.setTitle(Html.fromHtml("<font color='#0F232D'>Book Slot? </font>"));
+                builder3.setMessage("Are you sure you want to book the slot you just selected? : ");
+                builder3.setPositiveButton("Confirm",
+                        (dialog3, which) -> {
+                            TextView tv= fragmentView.findViewById(R.id.textview3);
+                            String tvreftemp= tv.getText().toString();
+                            String tvref= convertdateback(tvreftemp);
+                            Log.d(TAG, tvref);
+                            updateref(tvref, fragmentView);
+                        });
+                builder3.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                });
+
+                AlertDialog dialog3 = builder3.create();
+                dialog3.show();
+                dialog3.getWindow().setBackgroundDrawableResource(R.color.beige);
                 break;
             case R.id.button4:
+                AlertDialog.Builder builder4 = new AlertDialog.Builder(getContext());
+                builder4.setCancelable(true);
+                builder4.setTitle(Html.fromHtml("<font color='#0F232D'>Book Slot? </font>"));
+                builder4.setMessage("Are you sure you want to book the slot you just selected? : ");
+                builder4.setPositiveButton("Confirm",
+                        (dialog4, which) -> {
+                            TextView tv= fragmentView.findViewById(R.id.textview4);
+                            String tvreftemp= tv.getText().toString();
+                            String tvref= convertdateback(tvreftemp);
+                            Log.d(TAG, tvref);
+                            updateref(tvref, fragmentView);
+                        });
+                builder4.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                });
+
+                AlertDialog dialog4 = builder4.create();
+                dialog4.show();
+                dialog4.getWindow().setBackgroundDrawableResource(R.color.beige);
                 break;
             case R.id.button5:
+                AlertDialog.Builder builder5 = new AlertDialog.Builder(getContext());
+                builder5.setCancelable(true);
+                builder5.setTitle(Html.fromHtml("<font color='#0F232D'>Book Slot? </font>"));
+                builder5.setMessage("Are you sure you want to book the slot you just selected? : ");
+                builder5.setPositiveButton("Confirm",
+                        (dialog5, which) -> {
+                            TextView tv= fragmentView.findViewById(R.id.textview5);
+                            String tvreftemp= tv.getText().toString();
+                            String tvref= convertdateback(tvreftemp);
+                            Log.d(TAG, tvref);
+                            updateref(tvref, fragmentView);
+                        });
+                builder5.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                });
+
+                AlertDialog dialog5 = builder5.create();
+                dialog5.show();
+                dialog5.getWindow().setBackgroundDrawableResource(R.color.beige);
                 break;
             case R.id.button6:
+                AlertDialog.Builder builder6 = new AlertDialog.Builder(getContext());
+                builder6.setCancelable(true);
+                builder6.setTitle(Html.fromHtml("<font color='#0F232D'>Book Slot? </font>"));
+                builder6.setMessage("Are you sure you want to book the slot you just selected? : ");
+                builder6.setPositiveButton("Confirm",
+                        (dialog6, which) -> {
+                            TextView tv= fragmentView.findViewById(R.id.textview6);
+                            String tvreftemp= tv.getText().toString();
+                            String tvref= convertdateback(tvreftemp);
+                            Log.d(TAG, tvref);
+                            updateref(tvref, fragmentView);
+                        });
+                builder6.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                });
+
+                AlertDialog dialog6 = builder6.create();
+                dialog6.show();
+                dialog6.getWindow().setBackgroundDrawableResource(R.color.beige);
                 break;
             case R.id.button7:
+                AlertDialog.Builder builder7 = new AlertDialog.Builder(getContext());
+                builder7.setCancelable(true);
+                builder7.setTitle(Html.fromHtml("<font color='#0F232D'>Book Slot? </font>"));
+                builder7.setMessage("Are you sure you want to book the slot you just selected? : ");
+                builder7.setPositiveButton("Confirm",
+                        (dialog7, which) -> {
+                            TextView tv= fragmentView.findViewById(R.id.textview7);
+                            String tvreftemp= tv.getText().toString();
+                            String tvref= convertdateback(tvreftemp);
+                            Log.d(TAG, tvref);
+                            updateref(tvref, fragmentView);
+                        });
+                builder7.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                });
+
+                AlertDialog dialog7 = builder7.create();
+                dialog7.show();
+                dialog7.getWindow().setBackgroundDrawableResource(R.color.beige);
                 break;
             case R.id.button8:
+                AlertDialog.Builder builder8 = new AlertDialog.Builder(getContext());
+                builder8.setCancelable(true);
+                builder8.setTitle(Html.fromHtml("<font color='#0F232D'>Book Slot? </font>"));
+                builder8.setMessage("Are you sure you want to book the slot you just selected? : ");
+                builder8.setPositiveButton("Confirm",
+                        (dialog8, which) -> {
+                            TextView tv= fragmentView.findViewById(R.id.textview8);
+                            String tvreftemp= tv.getText().toString();
+                            String tvref= convertdateback(tvreftemp);
+                            Log.d(TAG, tvref);
+                            updateref(tvref, fragmentView);
+                        });
+                builder8.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                });
+
+                AlertDialog dialog8 = builder8.create();
+                dialog8.show();
+                dialog8.getWindow().setBackgroundDrawableResource(R.color.beige);
                 break;
             case R.id.button9:
-                break;
+                AlertDialog.Builder builder9 = new AlertDialog.Builder(getContext());
+                builder9.setCancelable(true);
+                builder9.setTitle(Html.fromHtml("<font color='#0F232D'>Book Slot? </font>"));
+                builder9.setMessage("Are you sure you want to book the slot you just selected? : ");
+                builder9.setPositiveButton("Confirm",
+                        (dialog9, which) -> {
+                            TextView tv= fragmentView.findViewById(R.id.textview6);
+                            String tvreftemp= tv.getText().toString();
+                            String tvref= convertdateback(tvreftemp);
+                            Log.d(TAG, tvref);
+                            updateref(tvref, fragmentView);
+                        });
+                builder9.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                });
 
+                AlertDialog dialog9 = builder9.create();
+                dialog9.show();
+                dialog9.getWindow().setBackgroundDrawableResource(R.color.beige);
+                break;
         }
     }
 
-    public void createbuttons(ArrayList<Map<String, String>> x, View view){
-        //ArrayList<Map> alm = (ArrayList<Map>) x;
-        ArrayList<Map<String, String>> newar= x;
+    /*main button to access the states of slots and add them to UI*/
+    public void createbuttons(ArrayList<Map> x, View view){
+        /*converting the arraylist to a 2d array for easy accessing*/
+        ArrayList<Map> newar= x;
         Object[][] main= new Object[0][5];
+        Object[][] bookedslots= new Object[0][5];
         for (Map m:newar){
             Object[] temp= new Object[0];
-//            ArrayList<Integer> keys= new ArrayList<Integer>(m.keySet());
-//            ArrayList<Object> vals= new ArrayList<Object>(m.values());
 
             String d= (String) m.get("Date");
             temp= addo(temp, d);
@@ -193,17 +348,24 @@ public class StudentScheduleFragment extends Fragment implements View.OnClickLis
             String s= (String) m.get("Student_Name");
             temp= addo(temp, s);
 
-            Boolean b= (Boolean) m.get("is_booked");
+            String b= (String) m.get("isBooked");
             temp= addo(temp, b);
 
-            main= addo(main, temp);
+            if (m.get("isBooked").equals("false")){
+                main= addo(main, temp);
+            }
+            else{
+                bookedslots=addo(main, temp);
+            }
         }
 
-        if (main.length<=10){
+        /*updating UI*/
+        if (main.length>0){
             TextView intro= fragmentView.findViewById(R.id.intro);
             intro.setText("The following slots for Prof. X are available: ");
             for (int i=0; i<main.length; i++){
-                String dateandtime = main[i][0].toString() + main[i][1].toString();
+                String tempdnt = main[i][0].toString() + " " + main[i][1].toString();
+                String dateandtime= converttoMM(tempdnt);
                 String gettv= "textview"+String.valueOf(i);
                 String getll= "hlinearlo"+String.valueOf(i);
                 String packageName = getContext().getPackageName();
@@ -215,32 +377,17 @@ public class StudentScheduleFragment extends Fragment implements View.OnClickLis
                 TextView temptv= view.findViewById(tvID);
                 temptv.setText(dateandtime);
 
-
             }
         }
         else{
-//            TextView intro= view.findViewById(R.id.intro);
-//            main= sort(main);
-//            intro.setText("The following slots for Prof. X are available: ");
-//            for (int i=0; i<10; i++){
-//                String dateandtime = "Date: " + main[i][0].toString() + " Time: " + main[i][1].toString();
-//                String gettv= "textview"+String.valueOf(i);
-//                String getll= "hlinearlo"+String.valueOf(i);
-//                int tvID = getResources().getIdentifier(gettv, "id", getPackageName());
-//                int llID = getResources().getIdentifier(getll, "id", getPackageName());
-//
-//                LinearLayout hlo= findViewById(llID);
-//                hlo.setVisibility(hlo.VISIBLE);
-//                TextView temptv= findViewById(tvID);
-//                temptv.setText(dateandtime);
-//
-//
-//            }
-        }
+            TextView intro= fragmentView.findViewById(R.id.intro);
+            intro.setText("There are currently no slots available, sorry! ");
 
+            }
 
     }
 
+    /*method to add objects in 1d array*/
     public Object[] addo(Object[] arr, Object x){
         int i;
         int n= arr.length;
@@ -253,6 +400,7 @@ public class StudentScheduleFragment extends Fragment implements View.OnClickLis
         return narr;
     }
 
+    /*method to add objects in 2d array*/
     public Object[][] addo(Object[][] twodarr, Object[] x){
         int i;
         int n= twodarr.length;
@@ -265,15 +413,11 @@ public class StudentScheduleFragment extends Fragment implements View.OnClickLis
         return narr;
     }
 
-    public Object[][] sort(Object[][] twodarr){
-        return twodarr;
-    }
-
+    /*updateref which has String(date+time) as tvref argument*/
     public void updateref(String tvref, View view){
         HashMap<String, String> mrem;
 
-        DocumentReference docRef = db.collection("profschedule").document("dqpqTSphxfS4xy0B2R5NeHv638D2");
-
+        DocumentReference docRef= getcurrentdocref(view);
         ExecutorService executor = Executors.newSingleThreadExecutor();
         Looper mainLooper = Looper.getMainLooper();
         Handler handler = new Handler(mainLooper);
@@ -294,6 +438,10 @@ public class StudentScheduleFragment extends Fragment implements View.OnClickLis
                                     handler.post(() -> {
                                         book(mx, docRef, slotlist, view);
                                     });
+                                    handler.post(() -> {
+                                        getdocref(view, docRef);
+                                    });
+
 
                                     break;
                                 }
@@ -310,8 +458,10 @@ public class StudentScheduleFragment extends Fragment implements View.OnClickLis
         });
 
 
+
     }
 
+    /*method to create a new hashmap given the args*/
     public static HashMap<String, String> hashMapCreator(String event, String date, String time, String teacher_id, String booking, String student_id)
     {
         HashMap<String, String> temp = new HashMap<>();
@@ -324,18 +474,143 @@ public class StudentScheduleFragment extends Fragment implements View.OnClickLis
         return temp;
     }
 
+    /*method to update the databse (remove+add updated entry)*/
     public void book(Map<String, String> map,DocumentReference docRef , ArrayList<Map<String, String>> temp, View view){
         docRef.update("slots", FieldValue.arrayRemove(map));
-        String event= "Meeting with "+ "Student Id";
-        String date2= (String) map.get("Date");
-        String time2= (String) map.get("Time");
-        String teacher_id= (String) map.get("Teacher_id");
-        String booking= "true";
-        String stu= "Student X";
+        this.sessionManager = new SessionManager(getContext());
+        String studentuserid= this.sessionManager.getCurrentUser().getUid();
+        DocumentReference docRefstd= db.collection("users").document(studentuserid);
+        String name = null;
 
-        HashMap<String, String> newmap= hashMapCreator(event, date2, time2, teacher_id, booking, stu );
-        docRef.update("slots", FieldValue.arrayUnion(newmap));
+        docRefstd.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.getResult().exists()){
+                    String name= task.getResult().getString("name");
+                    String event= "Meeting with "+ name;
+                    String date2= (String) map.get("Date");
+                    String time2= (String) map.get("Time");
+                    String teacher_id= (String) map.get("Teacher_id");
+                    String booking= "true";
+                    String stu= "Student "+ name;
 
-        createbuttons(temp, view);
+                    HashMap<String, String> newmap= hashMapCreator(event, date2, time2, teacher_id, booking, stu );
+                    docRef.update("slots", FieldValue.arrayUnion(newmap));
+                }
+                else{
+                    Log.d(TAG, "getting name didn't work");
+                }
+            }
+        });
+
+
+        //createbuttons(temp, view);
     }
+
+    /*getting the docref and updating UI through the createbuttons method called*/
+    public void getdocref(View view, DocumentReference docRef){
+        for (int i=0; i<10; i++){
+            String gettv= "textview"+String.valueOf(i);
+            String getll= "hlinearlo"+String.valueOf(i);
+            String packageName = getContext().getPackageName();
+            int tvID = getResources().getIdentifier(gettv, "id", packageName);
+            int llID = getResources().getIdentifier(getll, "id", packageName);
+
+            LinearLayout hlo= view.findViewById(llID);
+            hlo.setVisibility(hlo.INVISIBLE);
+
+        }
+        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    if (document.exists()) {
+                        SlotsModel s = new SlotsModel();
+                        s.setSlots((ArrayList<Map>) document.get("slots"));
+                        createbuttons((ArrayList<Map>) s.getSlots(), fragmentView);
+                        Log.d(TAG, "Inital DocumentSnapshot data: " + document.getData());
+                    } else {
+                        Log.d(TAG, "No such document");
+                    }
+                } else {
+                    Log.d(TAG, "get failed with ", task.getException());
+                }
+            }
+        });
+    }
+
+    /*converting date+time to UI String*/
+    public String converttoMM(String s){
+        SimpleDateFormat month_date = new SimpleDateFormat("dd'th of' MMM yyyy 'at' HH:mm", Locale.ENGLISH); //converted into
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");//to be converted from
+
+        String actualDate = s;
+
+        Date date = null;
+        try {
+            date = sdf.parse(actualDate);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        String result = month_date.format(date);
+        Log.d(TAG, result);
+        return result;
+    }
+
+    /*converting the UI String back for comparing when updating*/
+    public String convertdateback(String s){
+        SimpleDateFormat month_date = new SimpleDateFormat("yyyy-MM-ddHH:mm", Locale.ENGLISH); //converted into
+        SimpleDateFormat sdf = new SimpleDateFormat("dd'th of' MMM yyyy 'at' HH:mm"); //to be converted from
+
+        String actualDate = s;
+
+        Date date = null;
+        try {
+            date = sdf.parse(actualDate);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        String result = month_date.format(date);
+        Log.d(TAG, result);
+        return result;
+    }
+
+    public DocumentReference getcurrentdocref(View view){
+        Bundle args= getArguments();
+        if (args != null) {
+            Log.d(TAG, "Student Schedule Args");
+            User activeTeacher = User.deserialise(args.getString("contact"));
+            String userid= activeTeacher.getUid();
+            DocumentReference docRef = db.collection("profschedule").document(userid);
+            getdocref(view, docRef);
+            return docRef;
+        }
+        else{
+            return null;
+        }
+    }
+
+    public String getstudentname(View view){
+        this.sessionManager = new SessionManager(getContext());
+        String studentuserid= this.sessionManager.getCurrentUser().getUid();
+        DocumentReference docRef= db.collection("users").document(studentuserid);
+        String name = null;
+
+        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.getResult().exists()){
+                    String name= task.getResult().getString("name");
+                }
+                else{
+                    Log.d(TAG, "getting name didn't work");
+                }
+            }
+        });
+        return name;
+    }
+
 }
